@@ -10,14 +10,19 @@ import XCTest
 
 @MainActor
 final class DownloadServiceTests: XCTestCase {
-
     // MARK: - Local Mock Protocol
-    // Unique class here to avoid colliding with DownloadCoverTests' MockURLProtocol
+
+    /// Unique class here to avoid colliding with DownloadCoverTests' MockURLProtocol
     private class ServiceMockURLProtocol: URLProtocol {
         nonisolated(unsafe) static var requestHandler: ((URLRequest) -> (HTTPURLResponse, Data?, Error?))?
 
-        override class func canInit(with request: URLRequest) -> Bool { true }
-        override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+        override class func canInit(with _: URLRequest) -> Bool {
+            true
+        }
+
+        override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+            request
+        }
 
         override func startLoading() {
             guard let client = client, let handler = ServiceMockURLProtocol.requestHandler else { return }
@@ -51,7 +56,7 @@ final class DownloadServiceTests: XCTestCase {
     func makeSUT() -> (DownloadService, DownloadManager) {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [ServiceMockURLProtocol.self]
-        
+
         let manager = DownloadManager(configuration: config)
         let service = DownloadService(manager: manager)
 
@@ -66,11 +71,11 @@ final class DownloadServiceTests: XCTestCase {
 
         // Setup Mock
         ServiceMockURLProtocol.requestHandler = { request in
-            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data(), nil)
+            (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data(), nil)
         }
 
         downloadService.startDownload(url: url, for: id)
-        
+
         // Allow actor to process
         try? await Task.sleep(nanoseconds: 100_000_000)
 
@@ -89,7 +94,7 @@ final class DownloadServiceTests: XCTestCase {
 
         let id = UUID()
         let url = try XCTUnwrap(URL(string: "https://example.com/test.epub"))
-        
+
         // Setup Mock with Content-Length so progress can be calculated
         ServiceMockURLProtocol.requestHandler = { request in
             let data = Data(count: 1024)
@@ -106,12 +111,13 @@ final class DownloadServiceTests: XCTestCase {
 
         // Subscribe first
         let events = downloadService.downloadEvents
-        
+
         Task {
             for await event in events {
                 if case let .didUpdateProgress(eventId, progress) = event,
                    eventId == id,
-                   progress > 0 {
+                   progress > 0
+                {
                     progressExp.fulfill()
                     break
                 }
@@ -167,11 +173,11 @@ final class DownloadServiceTests: XCTestCase {
     func testConcurrentStartDownload() async {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [ServiceMockURLProtocol.self]
-        
+
         ServiceMockURLProtocol.requestHandler = { request in
-            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data(), nil)
+            (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data(), nil)
         }
-        
+
         let concurrentManager = DownloadManager(configuration: config)
         let concurrentCount = 50
 
