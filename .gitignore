@@ -1,0 +1,38 @@
+# --- Xcode ---
+# User-specific files (Don't track these!)
+xcuserdata/
+*.userdata
+*.lsanywhere
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+
+# --- Swift Package Manager ---
+.build/
+.swiftpm/
+# Log files
+Packages.resolved
+# Note: Some teams prefer to track Package.resolved to lock versions.
+# Remove the line above if you want to commit your dependency versions.
+
+# --- CocoaPods ---
+# It is generally recommended to NOT gitignore the Pods/ folder
+# unless you want every dev to run 'pod install' immediately.
+# Pods/
+
+# --- Carthage ---
+Carthage/Build/
+
+# --- Fastlane ---
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# --- General / OS ---
+.DS_Store
+*.swp
+*.lock
+.env

@@ -1,0 +1,684 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		959235332F0228660020050A /* ReadiumAdapterGCDWebServer in Frameworks */ = {isa = PBXBuildFile; productRef = 959235322F0228660020050A /* ReadiumAdapterGCDWebServer */; };
+		959235352F0228660020050A /* ReadiumAdapterLCPSQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 959235342F0228660020050A /* ReadiumAdapterLCPSQLite */; };
+		959235372F0228660020050A /* ReadiumLCP in Frameworks */ = {isa = PBXBuildFile; productRef = 959235362F0228660020050A /* ReadiumLCP */; };
+		959235392F0228660020050A /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = 959235382F0228660020050A /* ReadiumNavigator */; };
+		9592353B2F0228660020050A /* ReadiumOPDS in Frameworks */ = {isa = PBXBuildFile; productRef = 9592353A2F0228660020050A /* ReadiumOPDS */; };
+		9592353D2F0228660020050A /* ReadiumShared in Frameworks */ = {isa = PBXBuildFile; productRef = 9592353C2F0228660020050A /* ReadiumShared */; };
+		9592353F2F0228660020050A /* ReadiumStreamer in Frameworks */ = {isa = PBXBuildFile; productRef = 9592353E2F0228660020050A /* ReadiumStreamer */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		959273612F3441D30060D1A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 959234F82F0227100020050A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 959234FF2F0227100020050A;
+			remoteInfo = ReadiumSwiftTestApp;
+		};
+		95F3150A2F36E5AC008E1D03 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 959234F82F0227100020050A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 959234FF2F0227100020050A;
+			remoteInfo = ReadiumSwiftTestApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		959235002F0227100020050A /* ReadiumSwiftTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadiumSwiftTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9592735D2F3441D30060D1A0 /* ReadiumSwiftTestAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReadiumSwiftTestAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		95F315042F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReadiumSwiftTestAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		959235022F0227100020050A /* ReadiumSwiftTestApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ReadiumSwiftTestApp;
+			sourceTree = "<group>";
+		};
+		9592735E2F3441D30060D1A0 /* ReadiumSwiftTestAppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ReadiumSwiftTestAppTests;
+			sourceTree = "<group>";
+		};
+		95F315052F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ReadiumSwiftTestAppUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		959234FD2F0227100020050A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				959235372F0228660020050A /* ReadiumLCP in Frameworks */,
+				9592353D2F0228660020050A /* ReadiumShared in Frameworks */,
+				959235352F0228660020050A /* ReadiumAdapterLCPSQLite in Frameworks */,
+				9592353B2F0228660020050A /* ReadiumOPDS in Frameworks */,
+				9592353F2F0228660020050A /* ReadiumStreamer in Frameworks */,
+				959235392F0228660020050A /* ReadiumNavigator in Frameworks */,
+				959235332F0228660020050A /* ReadiumAdapterGCDWebServer in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9592735A2F3441D30060D1A0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		95F315012F36E5AC008E1D03 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		959234F72F0227100020050A = {
+			isa = PBXGroup;
+			children = (
+				959235022F0227100020050A /* ReadiumSwiftTestApp */,
+				9592735E2F3441D30060D1A0 /* ReadiumSwiftTestAppTests */,
+				95F315052F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests */,
+				959235012F0227100020050A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		959235012F0227100020050A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				959235002F0227100020050A /* ReadiumSwiftTestApp.app */,
+				9592735D2F3441D30060D1A0 /* ReadiumSwiftTestAppTests.xctest */,
+				95F315042F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		959234FF2F0227100020050A /* ReadiumSwiftTestApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9592350B2F0227120020050A /* Build configuration list for PBXNativeTarget "ReadiumSwiftTestApp" */;
+			buildPhases = (
+				959234FC2F0227100020050A /* Sources */,
+				959234FD2F0227100020050A /* Frameworks */,
+				959234FE2F0227100020050A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				959235022F0227100020050A /* ReadiumSwiftTestApp */,
+			);
+			name = ReadiumSwiftTestApp;
+			packageProductDependencies = (
+				959235322F0228660020050A /* ReadiumAdapterGCDWebServer */,
+				959235342F0228660020050A /* ReadiumAdapterLCPSQLite */,
+				959235362F0228660020050A /* ReadiumLCP */,
+				959235382F0228660020050A /* ReadiumNavigator */,
+				9592353A2F0228660020050A /* ReadiumOPDS */,
+				9592353C2F0228660020050A /* ReadiumShared */,
+				9592353E2F0228660020050A /* ReadiumStreamer */,
+			);
+			productName = MyReadiumApp;
+			productReference = 959235002F0227100020050A /* ReadiumSwiftTestApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9592735C2F3441D30060D1A0 /* ReadiumSwiftTestAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 959273652F3441D30060D1A0 /* Build configuration list for PBXNativeTarget "ReadiumSwiftTestAppTests" */;
+			buildPhases = (
+				959273592F3441D30060D1A0 /* Sources */,
+				9592735A2F3441D30060D1A0 /* Frameworks */,
+				9592735B2F3441D30060D1A0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				959273622F3441D30060D1A0 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9592735E2F3441D30060D1A0 /* ReadiumSwiftTestAppTests */,
+			);
+			name = ReadiumSwiftTestAppTests;
+			packageProductDependencies = (
+			);
+			productName = ReadiumSwiftTestAppTests;
+			productReference = 9592735D2F3441D30060D1A0 /* ReadiumSwiftTestAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		95F315032F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95F3150C2F36E5AC008E1D03 /* Build configuration list for PBXNativeTarget "ReadiumSwiftTestAppUITests" */;
+			buildPhases = (
+				95F315002F36E5AC008E1D03 /* Sources */,
+				95F315012F36E5AC008E1D03 /* Frameworks */,
+				95F315022F36E5AC008E1D03 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				95F3150B2F36E5AC008E1D03 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				95F315052F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests */,
+			);
+			name = ReadiumSwiftTestAppUITests;
+			packageProductDependencies = (
+			);
+			productName = ReadiumSwiftTestAppUITests;
+			productReference = 95F315042F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		959234F82F0227100020050A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					959234FF2F0227100020050A = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					9592735C2F3441D30060D1A0 = {
+						CreatedOnToolsVersion = 26.2;
+						LastSwiftMigration = 2620;
+						TestTargetID = 959234FF2F0227100020050A;
+					};
+					95F315032F36E5AC008E1D03 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 959234FF2F0227100020050A;
+					};
+				};
+			};
+			buildConfigurationList = 959234FB2F0227100020050A /* Build configuration list for PBXProject "ReadiumSwiftTestApp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 959234F72F0227100020050A;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 959235012F0227100020050A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				959234FF2F0227100020050A /* ReadiumSwiftTestApp */,
+				9592735C2F3441D30060D1A0 /* ReadiumSwiftTestAppTests */,
+				95F315032F36E5AC008E1D03 /* ReadiumSwiftTestAppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		959234FE2F0227100020050A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9592735B2F3441D30060D1A0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		95F315022F36E5AC008E1D03 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		959234FC2F0227100020050A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		959273592F3441D30060D1A0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		95F315002F36E5AC008E1D03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		959273622F3441D30060D1A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 959234FF2F0227100020050A /* ReadiumSwiftTestApp */;
+			targetProxy = 959273612F3441D30060D1A0 /* PBXContainerItemProxy */;
+		};
+		95F3150B2F36E5AC008E1D03 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 959234FF2F0227100020050A /* ReadiumSwiftTestApp */;
+			targetProxy = 95F3150A2F36E5AC008E1D03 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		959235092F0227120020050A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		9592350A2F0227120020050A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		9592350C2F0227120020050A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.MyReadiumApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		9592350D2F0227120020050A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.MyReadiumApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		959273632F3441D30060D1A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ReadiumSwiftTestAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReadiumSwiftTestApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReadiumSwiftTestApp";
+			};
+			name = Debug;
+		};
+		959273642F3441D30060D1A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ReadiumSwiftTestAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReadiumSwiftTestApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReadiumSwiftTestApp";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		95F3150D2F36E5AC008E1D03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ReadiumSwiftTestAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ReadiumSwiftTestApp;
+			};
+			name = Debug;
+		};
+		95F3150E2F36E5AC008E1D03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ReadiumSwiftTestAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ReadiumSwiftTestApp;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		959234FB2F0227100020050A /* Build configuration list for PBXProject "ReadiumSwiftTestApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				959235092F0227120020050A /* Debug */,
+				9592350A2F0227120020050A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9592350B2F0227120020050A /* Build configuration list for PBXNativeTarget "ReadiumSwiftTestApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9592350C2F0227120020050A /* Debug */,
+				9592350D2F0227120020050A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		959273652F3441D30060D1A0 /* Build configuration list for PBXNativeTarget "ReadiumSwiftTestAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				959273632F3441D30060D1A0 /* Debug */,
+				959273642F3441D30060D1A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		95F3150C2F36E5AC008E1D03 /* Build configuration list for PBXNativeTarget "ReadiumSwiftTestAppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95F3150D2F36E5AC008E1D03 /* Debug */,
+				95F3150E2F36E5AC008E1D03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/readium/swift-toolkit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		959235322F0228660020050A /* ReadiumAdapterGCDWebServer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumAdapterGCDWebServer;
+		};
+		959235342F0228660020050A /* ReadiumAdapterLCPSQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumAdapterLCPSQLite;
+		};
+		959235362F0228660020050A /* ReadiumLCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumLCP;
+		};
+		959235382F0228660020050A /* ReadiumNavigator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumNavigator;
+		};
+		9592353A2F0228660020050A /* ReadiumOPDS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumOPDS;
+		};
+		9592353C2F0228660020050A /* ReadiumShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumShared;
+		};
+		9592353E2F0228660020050A /* ReadiumStreamer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumStreamer;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 959234F82F0227100020050A /* Project object */;
+}

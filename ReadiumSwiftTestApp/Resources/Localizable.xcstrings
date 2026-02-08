@@ -1,0 +1,219 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Add" : {
+
+    },
+    "Add Book" : {
+
+    },
+    "Add books using the + button." : {
+
+    },
+    "Add Feed" : {
+
+    },
+    "Add feeds using the + button." : {
+
+    },
+    "Add from File" : {
+
+    },
+    "Add from URL" : {
+
+    },
+    "Add Note to Highlight" : {
+
+    },
+    "Appearance" : {
+
+    },
+    "Are you sure you want to delete '%@'?" : {
+
+    },
+    "Are you sure you want to delete '%@'? This cannot be undone." : {
+
+    },
+    "Are you sure you want to delete these %lld feeds?" : {
+
+    },
+    "Bookmark Saved" : {
+
+    },
+    "Bookmarks" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Close" : {
+
+    },
+    "Contents" : {
+
+    },
+    "Dark" : {
+
+    },
+    "Default" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete Book?" : {
+
+    },
+    "Delete Feed?" : {
+
+    },
+    "Details" : {
+
+    },
+    "Done" : {
+
+    },
+    "Download" : {
+
+    },
+    "Download Failed" : {
+
+    },
+    "Downloaded" : {
+
+    },
+    "Downloading..." : {
+
+    },
+    "Edit" : {
+
+    },
+    "Edit Feed" : {
+
+    },
+    "Enter the direct URL to an EPUB or PDF file." : {
+
+    },
+    "Error loading feed" : {
+
+    },
+    "Error opening book: %@" : {
+
+    },
+    "Error: %@" : {
+
+    },
+    "Font Size: %lld%%" : {
+
+    },
+    "Highlight" : {
+
+    },
+    "Highlights" : {
+
+    },
+    "Initializing..." : {
+
+    },
+    "Language" : {
+
+    },
+    "Layout" : {
+
+    },
+    "Library" : {
+
+    },
+    "Library is Empty" : {
+
+    },
+    "Light" : {
+
+    },
+    "Loading Feed..." : {
+
+    },
+    "Navigation" : {
+
+    },
+    "No download available" : {
+
+    },
+    "No OPDS Feeds" : {
+
+    },
+    "Note" : {
+
+    },
+    "Note: %@" : {
+
+    },
+    "OK" : {
+
+    },
+    "OPDS" : {
+
+    },
+    "OPDS Feeds" : {
+
+    },
+    "Opening..." : {
+
+    },
+    "Optionally add a note to this highlight." : {
+
+    },
+    "Preferences" : {
+
+    },
+    "Publications" : {
+
+    },
+    "Retry" : {
+
+    },
+    "Save" : {
+
+    },
+    "Scroll" : {
+
+    },
+    "Search" : {
+
+    },
+    "Search..." : {
+
+    },
+    "See All" : {
+
+    },
+    "Sepia" : {
+
+    },
+    "Setting up..." : {
+
+    },
+    "Tabs" : {
+
+    },
+    "Text" : {
+
+    },
+    "Text to Speech" : {
+
+    },
+    "Theme" : {
+
+    },
+    "Title" : {
+
+    },
+    "URL" : {
+
+    },
+    "Voice" : {
+
+    }
+  },
+  "version" : "1.1"
+}
