@@ -10,7 +10,7 @@ import Foundation
 import Observation
 
 /// Specific errors that can occur during download operations.
-enum DownloadError: Error, Equatable {
+public enum DownloadError: Error, Equatable {
     case network(URLError)
     case fileSystem(String)
     case invalidResponse(Int)
@@ -38,7 +38,7 @@ struct Download: Sendable {
 public enum DownloadEvent: Sendable {
     case didFinish(id: UUID, location: URL)
     case didUpdateProgress(id: UUID, progress: Double)
-    case didFail(id: UUID, error: Error)
+    case didFail(id: UUID, error: DownloadError)
 }
 
 /// Actor responsible for handling background downloads.
@@ -166,7 +166,8 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
             try FileManager.default.moveItem(at: tempLocation, to: destination)
             continuation.yield(.didFinish(id: id, location: destination))
         } catch {
-            continuation.yield(.didFail(id: id, error: error))
+            let downloadError: DownloadError = (error as? DownloadError) ?? .fileSystem(error.localizedDescription)
+            continuation.yield(.didFail(id: id, error: downloadError))
         }
     }
 
@@ -179,7 +180,8 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
 
     private func handleError(taskID: Int, error: Error) {
         guard let id = taskMap[taskID] else { return }
-        continuation.yield(.didFail(id: id, error: error))
+        let downloadError = DownloadError.wrap(error)
+        continuation.yield(.didFail(id: id, error: downloadError))
         taskMap[taskID] = nil
     }
 }

@@ -16,7 +16,7 @@ import Observation
 class OPDSBrowserViewModel {
     var feed: Feed?
     var isLoading = false
-    var error: Error?
+    var error: OPDSBrowserError?
 
     private let parsingService: OPDSParsingService
 

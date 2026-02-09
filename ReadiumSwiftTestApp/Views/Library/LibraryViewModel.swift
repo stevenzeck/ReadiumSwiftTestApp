@@ -9,6 +9,20 @@ import Foundation
 import Observation
 import SwiftData
 
+enum ImportError: LocalizedError {
+    case securityScopeAccessDenied
+    case fileSystem(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .securityScopeAccessDenied:
+            return "Unable to access the selected file."
+        case let .fileSystem(msg):
+            return "File system error: \(msg)"
+        }
+    }
+}
+
 /// ViewModel for the LibraryView, handling file imports and deletions.
 @MainActor
 @Observable
@@ -58,7 +72,17 @@ class LibraryViewModel {
     ///   - url: The security-scoped URL of the file to import.
     ///   - modelContext: The SwiftData context used for insertion.
     func importFile(from url: URL, modelContext: ModelContext) {
-        guard url.startAccessingSecurityScopedResource() else { return }
+        do {
+            try performImport(from: url, modelContext: modelContext)
+        } catch {
+            print("Import failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func performImport(from url: URL, modelContext: ModelContext) throws(ImportError) {
+        guard url.startAccessingSecurityScopedResource() else {
+            throw .securityScopeAccessDenied
+        }
         defer { url.stopAccessingSecurityScopedResource() }
 
         do {
@@ -80,7 +104,7 @@ class LibraryViewModel {
             modelContext.insert(newBook)
 
         } catch {
-            print("Error importing file: \(error)")
+            throw .fileSystem(error.localizedDescription)
         }
     }
 }
