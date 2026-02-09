@@ -37,9 +37,9 @@ final class TTSServiceTests: XCTestCase {
     func testTTSUtteranceStruct() throws {
         // Verify the app's wrapper struct holds data correctly
         let locator = try Locator(href: XCTUnwrap(AnyURL(string: "chap1")), mediaType: .html)
-        let utterance = AppTTSUtterance(text: "Hello World", locator: locator)
+        let utterance = AppTTSUtterance(text: "Hello World", locator: SendableLocator(locator: locator))
 
         XCTAssertEqual(utterance.text, "Hello World")
-        XCTAssertEqual(utterance.locator.href, locator.href)
+        XCTAssertEqual(utterance.locator.href, SendableLocator(locator: locator).href)
     }
 }

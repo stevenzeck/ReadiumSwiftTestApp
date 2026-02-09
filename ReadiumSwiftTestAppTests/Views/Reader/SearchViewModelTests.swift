@@ -83,7 +83,7 @@ final class SearchViewModelTests: XCTestCase {
         await fulfillment(of: [exp], timeout: 2.0)
 
         XCTAssertEqual(viewModel.results.count, 1)
-        XCTAssertEqual(viewModel.results.first?.href.string, "href")
+        XCTAssertEqual(viewModel.results.first?.href, "href")
         XCTAssertNil(viewModel.error)
     }
 

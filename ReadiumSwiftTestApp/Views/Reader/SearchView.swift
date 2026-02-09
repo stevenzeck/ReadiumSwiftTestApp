@@ -17,6 +17,7 @@ struct SearchView: View {
     @Bindable var viewModel: SearchViewModel
 
     /// Callback triggered when a search result is selected.
+    /// Returns the standard Readium `Locator` for navigation.
     var onResultSelected: (Locator) -> Void
 
     @Environment(\.dismiss) var dismiss
@@ -54,24 +55,24 @@ struct SearchView: View {
 
                 ScrollViewReader { proxy in
                     List {
-                        ForEach(viewModel.results, id: \.self) { locator in
+                        ForEach(viewModel.results, id: \.self) { locatorDTO in
                             VStack(alignment: .leading, spacing: 8) {
-                                let text = locator.text
-                                if text.highlight != nil {
-                                    Text(highlightedText(from: text))
+                                let textDTO = locatorDTO.text
+                                if textDTO.highlight != nil {
+                                    Text(highlightedText(from: textDTO))
                                         .font(.subheadline)
                                         .multilineTextAlignment(.leading)
                                 } else {
-                                    Text(locator.title ?? "Unknown location")
+                                    Text(locatorDTO.title ?? "Unknown location")
                                         .font(.subheadline)
                                 }
                             }
-                            .listRowBackground(locator == viewModel.lastSelectedLocator ? Color.gray.opacity(0.1) : Color.clear)
+                            .listRowBackground(locatorDTO == viewModel.lastSelectedLocator ? Color.gray.opacity(0.1) : Color.clear)
                             .contentShape(Rectangle())
-                            .id(locator)
+                            .id(locatorDTO)
                             .onTapGesture {
-                                viewModel.lastSelectedLocator = locator
-                                onResultSelected(locator)
+                                viewModel.lastSelectedLocator = locatorDTO
+                                onResultSelected(locatorDTO.toReadiumLocator)
                                 dismiss()
                             }
                         }
@@ -99,7 +100,7 @@ struct SearchView: View {
     // MARK: - Helpers
 
     /// Creates an AttributedString with the 'highlight' portion styled.
-    func highlightedText(from text: Locator.Text) -> AttributedString {
+    func highlightedText(from text: TextDTO) -> AttributedString {
         var attributed = AttributedString("")
 
         if let before = text.before {

@@ -177,11 +177,11 @@ class TTSViewModel: TTSServiceDelegate {
 
         case let .paused(utterance):
             isPlaying = false
-            utteranceLocator = utterance.locator
+            utteranceLocator = utterance.locator.toReadiumLocator
 
         case let .playing(utterance, range):
             isPlaying = true
-            utteranceLocator = utterance.locator
+            utteranceLocator = utterance.locator.toReadiumLocator
 
             // Auto page turn logic
             if let nav = navigator as? Navigator {
@@ -189,7 +189,7 @@ class TTSViewModel: TTSServiceDelegate {
                     if let range = range {
                         await nav.go(to: range)
                     } else {
-                        await nav.go(to: utterance.locator)
+                        await nav.go(to: utterance.locator.toReadiumLocator)
                     }
                 }
             }

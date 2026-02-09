@@ -21,8 +21,8 @@ class SearchViewModel {
     /// The search query entered by the user.
     var query: String = ""
 
-    /// The list of found locations matching the query.
-    var results: [Locator] = []
+    /// The list of found locations matching the query, stored as Sendable DTOs.
+    var results: [SendableLocator] = []
 
     /// Indicates if a search operation is currently in progress.
     var isLoading: Bool = false
@@ -31,11 +31,11 @@ class SearchViewModel {
     var error: String?
 
     /// Tracks the last selected locator to visually highlight the active result.
-    var lastSelectedLocator: Locator?
+    var lastSelectedLocator: SendableLocator?
 
     /// Tracks the current scroll position within the results list.
     /// This is separate from `lastSelectedLocator` to prevent the UI from auto-selecting the first visible item during scroll.
-    var scrollId: Locator?
+    var scrollId: SendableLocator?
 
     // MARK: - Private Properties
 
@@ -109,7 +109,9 @@ class SearchViewModel {
             switch result {
             case let .success(collection):
                 if let collection = collection {
-                    results.append(contentsOf: collection.locators)
+                    // Map Readium Locators to Sendable DTOs
+                    let newLocators = collection.locators.map { SendableLocator(locator: $0) }
+                    results.append(contentsOf: newLocators)
                 } else {
                     // nil collection indicates end of results
                     isLoading = false

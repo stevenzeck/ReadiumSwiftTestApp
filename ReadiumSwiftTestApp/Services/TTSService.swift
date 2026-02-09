@@ -6,15 +6,15 @@
 //
 
 import Foundation
-import ReadiumNavigator
-import ReadiumShared
+@preconcurrency import ReadiumNavigator
+@preconcurrency import ReadiumShared
 
-/// A wrapper for the TTS Utterance to allow mocking, as the library type's initializer is internal.
+/// A Sendable wrapper for TTS Utterances.
 ///
-/// - Note: We use `@unchecked Sendable` because `Locator` (from ReadiumShared) is not yet Sendable.
-struct AppTTSUtterance: Equatable, @unchecked Sendable {
+/// We use `SendableLocator` (DTO) to ensure strict concurrency safety.
+struct AppTTSUtterance: Equatable, Sendable {
     let text: String
-    let locator: Locator
+    let locator: SendableLocator
 }
 
 protocol TTSServiceDelegate: AnyObject {
@@ -89,15 +89,18 @@ class PublicationTTSService: TTSService, PublicationSpeechSynthesizerDelegate {
         case .stopped:
             appState = .stopped
         case let .paused(utterance):
-            appState = .paused(AppTTSUtterance(text: utterance.text, locator: utterance.locator))
+            let locatorDTO = SendableLocator(locator: utterance.locator)
+            appState = .paused(AppTTSUtterance(text: utterance.text, locator: locatorDTO))
         case let .playing(utterance, _):
-            appState = .playing(AppTTSUtterance(text: utterance.text, locator: utterance.locator), nil)
+            let locatorDTO = SendableLocator(locator: utterance.locator)
+            appState = .playing(AppTTSUtterance(text: utterance.text, locator: locatorDTO), nil)
         }
         delegate?.ttsService(self, stateDidChange: appState)
     }
 
     func publicationSpeechSynthesizer(_: PublicationSpeechSynthesizer, utterance: PublicationSpeechSynthesizer.Utterance, didFailWithError error: PublicationSpeechSynthesizer.Error) {
-        delegate?.ttsService(self, utterance: AppTTSUtterance(text: utterance.text, locator: utterance.locator), didFailWithError: error)
+        let locatorDTO = SendableLocator(locator: utterance.locator)
+        delegate?.ttsService(self, utterance: AppTTSUtterance(text: utterance.text, locator: locatorDTO), didFailWithError: error)
     }
 }
 

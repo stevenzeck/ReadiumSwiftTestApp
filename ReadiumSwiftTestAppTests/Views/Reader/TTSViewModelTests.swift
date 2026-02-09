@@ -27,14 +27,14 @@ class MockTTSService: TTSService {
         isPlaying = true
 
         let safeLocator = locator ?? Locator(href: AnyURL(string: "chap1")!, mediaType: MediaType.html)
-        let utterance = AppTTSUtterance(text: "Test", locator: safeLocator)
+        let utterance = AppTTSUtterance(text: "Test", locator: SendableLocator(locator: safeLocator))
         delegate?.ttsService(self, stateDidChange: .playing(utterance, nil))
     }
 
     func pauseOrResume() {
         isPlaying.toggle()
         let locator = Locator(href: AnyURL(string: "chap1")!, mediaType: MediaType.html)
-        let utterance = AppTTSUtterance(text: "Test", locator: locator)
+        let utterance = AppTTSUtterance(text: "Test", locator: SendableLocator(locator: locator))
 
         if isPlaying {
             delegate?.ttsService(self, stateDidChange: .playing(utterance, nil))
@@ -186,17 +186,17 @@ final class TTSViewModelTests: XCTestCase {
 
         try viewModel.setup(navigator: XCTUnwrap(mockNavigator), publication: publication)
 
-        // 1. Initial State
+        // Initial State
         XCTAssertNil(mockFactory.service.config.defaultLanguage)
 
-        // 2. Change Language
+        // Change Language
         let newLang = Language(code: .bcp47("fr"))
         viewModel.configLanguage = newLang
 
         // Verify service config updated
         XCTAssertEqual(mockFactory.service.config.defaultLanguage, newLang)
 
-        // 3. Change Voice
+        // Change Voice
         let voice = TTSVoice(identifier: "com.test.voice", language: newLang, name: "Test Voice", gender: .female, quality: .high)
         viewModel.availableVoices = [voice]
         viewModel.configVoice = voice
