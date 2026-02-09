@@ -28,7 +28,7 @@ class SearchViewModel {
     var isLoading: Bool = false
 
     /// Any error message resulting from the search attempt.
-    var error: String?
+    var error: SearchError?
 
     /// Tracks the last selected locator to visually highlight the active result.
     var lastSelectedLocator: SendableLocator?
@@ -72,14 +72,14 @@ class SearchViewModel {
         scrollId = nil
 
         searchTask = Task {
-            do {
+            do throws(SearchError) {
                 let iterator = try await searchService.search(query: query)
 
                 self.searchIterator = iterator
                 await loadAllResults(iterator: iterator)
 
             } catch {
-                self.error = error.localizedDescription
+                self.error = error
                 self.isLoading = false
             }
         }
@@ -118,7 +118,7 @@ class SearchViewModel {
                     return
                 }
             case let .failure(error):
-                self.error = error.localizedDescription
+                self.error = error
                 isLoading = false
                 return
             }

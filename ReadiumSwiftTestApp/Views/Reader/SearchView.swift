@@ -48,7 +48,7 @@ struct SearchView: View {
 
                 // Error Display
                 if let error = viewModel.error {
-                    Text("Error: \(error)")
+                    Text("Error: \(error.localizedDescription)")
                         .foregroundColor(.red)
                         .padding()
                 }
