@@ -159,7 +159,7 @@ class TTSViewModel: TTSServiceDelegate {
         }
     }
 
-    nonisolated func ttsService(_: TTSService, utterance _: AppTTSUtterance, didFailWithError error: Error) {
+    nonisolated func ttsService(_: TTSService, utterance _: AppTTSUtterance, didFailWithError error: PublicationSpeechSynthesizer.Error) {
         Task { @MainActor in
             print("TTS Error: \(error)")
             self.isPlaying = false

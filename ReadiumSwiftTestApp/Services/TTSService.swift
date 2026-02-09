@@ -19,7 +19,7 @@ struct AppTTSUtterance: Equatable, Sendable {
 
 protocol TTSServiceDelegate: AnyObject {
     func ttsService(_ service: TTSService, stateDidChange state: TTSState)
-    func ttsService(_ service: TTSService, utterance: AppTTSUtterance, didFailWithError error: Error)
+    func ttsService(_ service: TTSService, utterance: AppTTSUtterance, didFailWithError error: PublicationSpeechSynthesizer.Error)
 }
 
 /// Abstract state to decouple from PublicationSpeechSynthesizer.State

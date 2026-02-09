@@ -14,13 +14,27 @@ import ReadiumNavigator
 import SwiftData
 import SwiftUI
 
+enum BookOpenError: LocalizedError {
+    case invalidURL
+    case openFailed(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "The book file could not be found."
+        case let .openFailed(error):
+            return "Failed to open book: \(error.localizedDescription)"
+        }
+    }
+}
+
 @MainActor
 @Observable
 class ReaderViewModel {
     // MARK: - State
 
     var publication: Publication?
-    var error: Error?
+    var error: BookOpenError?
     var tableOfContents: [ReadiumShared.Link] = []
 
     // Child ViewModels
@@ -35,8 +49,18 @@ class ReaderViewModel {
         let fileURL = documents.appendingPathComponent(book.filePath)
 
         do {
-            guard let sourceURL = AnyURL(url: fileURL).absoluteURL else { throw PublicationError.invalidURL }
+            try await loadPublication(url: fileURL, assetRetriever: assetRetriever)
+        } catch {
+            self.error = error
+        }
+    }
 
+    private func loadPublication(url: URL, assetRetriever: AssetRetriever) async throws(BookOpenError) {
+        guard let sourceURL = AnyURL(url: url).absoluteURL else {
+            throw .invalidURL
+        }
+
+        do {
             let asset = try await assetRetriever.retrieve(url: sourceURL).get()
 
             let parsers: [PublicationParser] = [
@@ -60,11 +84,12 @@ class ReaderViewModel {
                 searchViewModel = SearchViewModel(publication: pub)
 
             case let .failure(err):
-                error = err
+                throw BookOpenError.openFailed(err)
             }
-
+        } catch let error as BookOpenError {
+            throw error
         } catch {
-            self.error = error
+            throw BookOpenError.openFailed(error)
         }
     }
 
