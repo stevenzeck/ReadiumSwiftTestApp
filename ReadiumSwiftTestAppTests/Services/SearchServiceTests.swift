@@ -62,14 +62,11 @@ final class SearchServiceTests: XCTestCase {
 
         // 3. Call search
         let query = "Find Me"
-        let result = await service.search(query: query)
-
-        // 4. Verify the call went through to the mock
-        switch result {
-        case .success:
-            XCTAssertTrue(true, "Search should succeed")
-        case let .failure(error):
-            XCTFail("Search failed: \(error)")
+        do {
+            let iterator = try await service.search(query: query)
+            XCTAssertNotNil(iterator, "Search should return a valid iterator")
+        } catch {
+            XCTFail("Search failed with error: \(error)")
         }
     }
 
@@ -82,15 +79,10 @@ final class SearchServiceTests: XCTestCase {
         // 2. Initialize the App's wrapper service
         let service = PublicationSearchService(publication: publication)
 
-        // 3. Call search
-        let result = await service.search(query: "query")
-
-        // 4. Verify it returns the standard "not searchable" failure
-        switch result {
-        case .success:
+        do {
+            _ = try await service.search(query: "query")
             XCTFail("Should fail if publication is not searchable")
-        case let .failure(error):
-            // Check matching error case using pattern matching since SearchError might not be Equatable
+        } catch {
             if case .publicationNotSearchable = error {
                 XCTAssertTrue(true)
             } else {

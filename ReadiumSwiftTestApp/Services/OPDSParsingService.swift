@@ -19,7 +19,7 @@ enum OPDSBrowserError: Error {
 /// Protocol definition for OPDS parsing.
 @MainActor
 protocol OPDSParsingService {
-    func parseURL(url: URL) async throws -> Feed?
+    func parseURL(url: URL) async throws(OPDSBrowserError) -> Feed?
 }
 
 @MainActor
@@ -30,9 +30,9 @@ class ReadiumOPDSParsingService: OPDSParsingService {
         self.client = client
     }
 
-    func parseURL(url: URL) async throws -> Feed? {
+    func parseURL(url: URL) async throws(OPDSBrowserError) -> Feed? {
         guard let httpURL = HTTPURL(url: url) else {
-            throw OPDSBrowserError.invalidURL
+            throw .invalidURL
         }
 
         let request = HTTPRequest(url: httpURL)
@@ -50,7 +50,6 @@ class ReadiumOPDSParsingService: OPDSParsingService {
                 return nil
             }
 
-            // Parse off the main thread
             let parsedFeed: Feed? = await Task.detached(priority: .userInitiated) {
                 // Try to parse as OPDS 1 (XML)
                 if let parseData = try? OPDS1Parser.parse(xmlData: data, url: url, response: httpResponse) {
@@ -66,12 +65,12 @@ class ReadiumOPDSParsingService: OPDSParsingService {
             }.value
 
             guard let feed = parsedFeed else {
-                throw OPDSBrowserError.notAnOPDSFeed
+                throw .notAnOPDSFeed
             }
             return feed
 
         case let .failure(error):
-            throw OPDSBrowserError.networkError(error)
+            throw .networkError(error)
         }
     }
 }

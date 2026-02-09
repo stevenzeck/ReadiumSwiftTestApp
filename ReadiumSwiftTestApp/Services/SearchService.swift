@@ -11,7 +11,7 @@ import Foundation
 /// Protocol definition for search capabilities.
 @MainActor
 protocol AppSearchService {
-    func search(query: String) async -> SearchResult<SearchIterator>
+    func search(query: String) async throws(SearchError) -> SearchIterator
 }
 
 @MainActor
@@ -22,7 +22,14 @@ class PublicationSearchService: AppSearchService {
         self.publication = publication
     }
 
-    func search(query: String) async -> SearchResult<SearchIterator> {
-        return await publication.search(query: query)
+    func search(query: String) async throws(SearchError) -> SearchIterator {
+        let result = await publication.search(query: query)
+
+        switch result {
+        case let .success(iterator):
+            return iterator
+        case let .failure(error):
+            throw error
+        }
     }
 }

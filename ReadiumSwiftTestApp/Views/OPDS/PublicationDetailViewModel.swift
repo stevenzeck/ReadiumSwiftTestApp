@@ -49,19 +49,16 @@ class PublicationDetailViewModel {
 
         // Handle Cover Download (if available)
         if let coverURL = publication.coverURL {
-            let container = modelContext.container
-
-            downloadService.downloadCover(url: coverURL, for: bookID) { filename in
-                guard let filename = filename else { return }
-
-                // Update the book with the cover path on the MainActor
-                Task { @MainActor in
-                    let context = container.mainContext
+            Task {
+                do {
+                    let filename = try await downloadService.downloadCover(url: coverURL, for: bookID)
                     let descriptor = FetchDescriptor<Book>(predicate: #Predicate { $0.id == bookID })
-                    if let book = try? context.fetch(descriptor).first {
+                    if let book = try? modelContext.fetch(descriptor).first {
                         book.coverPath = filename
-                        try? context.save()
+                        try? modelContext.save()
                     }
+                } catch {
+                    print("Failed to download cover: \(error)")
                 }
             }
         }

@@ -10,32 +10,53 @@ import XCTest
 
 /// Helper to intercept URL requests
 class MockURLProtocol: URLProtocol {
-    nonisolated(unsafe) static var requestHandler: ((URLRequest) -> (HTTPURLResponse, Data?, Error?))?
+    // MARK: - Thread-Safe Storage
+
+    /// A lock to protect access to the shared request handler.
+    private static let lock = NSLock()
+
+    /// The backing storage.
+    private nonisolated(unsafe) static var _requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+
+    /// Public thread-safe accessor for the request handler.
+    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))? {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _requestHandler
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _requestHandler = newValue
+        }
+    }
+
+    // MARK: - URLProtocol Overrides
 
     override class func canInit(with _: URLRequest) -> Bool {
-        true
+        return true
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
+        return request
     }
 
     override func startLoading() {
-        guard let handler = MockURLProtocol.requestHandler else {
-            XCTFail("Handler unavailable")
+        let handler = Self.requestHandler
+
+        guard let handler = handler else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
             return
         }
 
-        let (response, data, error) = handler(request)
-
-        if let error = error {
-            client?.urlProtocol(self, didFailWithError: error)
-        } else {
+        do {
+            let (response, data) = try handler(request)
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            if let data = data {
-                client?.urlProtocol(self, didLoad: data)
-            }
+            client?.urlProtocol(self, didLoad: data)
             client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
         }
     }
 
@@ -45,68 +66,78 @@ class MockURLProtocol: URLProtocol {
 @MainActor
 final class DownloadCoverTests: XCTestCase {
     var downloadService: DownloadService!
-    var session: URLSession!
-    var manager: DownloadManager!
 
     override func setUp() async throws {
-        try await super.setUp()
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
-        session = URLSession(configuration: config)
+        let mockSession = URLSession(configuration: config)
 
-        // Inject the mock session as the 'coverSession' into the Manager
-        manager = DownloadManager(coverSession: session)
-
-        // Inject the Manager into the Service
+        let manager = DownloadManager(coverSession: mockSession)
         downloadService = DownloadService(manager: manager)
     }
 
-    override func tearDown() async throws {
-        downloadService = nil
-        manager = nil
-        session = nil
+    override func tearDown() {
         MockURLProtocol.requestHandler = nil
-        try await super.tearDown()
     }
 
-    func testDownloadCoverSuccess() throws {
-        let bookId = UUID()
-        let coverURL = try XCTUnwrap(URL(string: "https://example.com/cover.jpg"))
-        let imageData = "fake image data".data(using: .utf8)!
+    func testDownloadCoverSuccess() async throws {
+        let bookID = UUID()
+        let url = try XCTUnwrap(URL(string: "https://example.com/cover.jpg"))
+        let dummyData = "imagedata".data(using: .utf8)!
 
         MockURLProtocol.requestHandler = { request in
+            XCTAssertEqual(request.url, url)
             let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            return (response, imageData, nil)
+            return (response, dummyData)
         }
 
-        let expectation = self.expectation(description: "Cover Downloaded")
-
-        downloadService.downloadCover(url: coverURL, for: bookId) { filename in
-            XCTAssertNotNil(filename)
-            XCTAssertTrue(filename!.contains(bookId.uuidString))
-            XCTAssertTrue(filename!.hasSuffix(".jpg"))
-            expectation.fulfill()
+        do {
+            let filename = try await downloadService.downloadCover(url: url, for: bookID)
+            XCTAssertTrue(filename.contains(bookID.uuidString))
+            XCTAssertTrue(filename.hasSuffix("jpg"))
+        } catch {
+            XCTFail("Expected success, but got error: \(error)")
         }
-
-        waitForExpectations(timeout: 2.0)
     }
 
-    func testDownloadCoverFailure() throws {
-        let bookId = UUID()
-        let coverURL = try XCTUnwrap(URL(string: "https://example.com/cover.jpg"))
+    func testDownloadCoverNotFound() async throws {
+        let bookID = UUID()
+        let url = try XCTUnwrap(URL(string: "https://example.com/missing.jpg"))
 
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
-            return (response, nil, NSError(domain: "test", code: 404))
+            return (response, Data())
         }
 
-        let expectation = self.expectation(description: "Cover Failed")
+        do {
+            _ = try await downloadService.downloadCover(url: url, for: bookID)
+            XCTFail("Expected failure, but succeeded")
+        } catch {
+            if case let .invalidResponse(code) = error {
+                XCTAssertEqual(code, 404)
+            } else {
+                XCTFail("Expected invalidResponse(404), got \(error)")
+            }
+        }
+    }
 
-        downloadService.downloadCover(url: coverURL, for: bookId) { filename in
-            XCTAssertNil(filename)
-            expectation.fulfill()
+    func testDownloadCoverNetworkError() async throws {
+        let bookID = UUID()
+        let url = try XCTUnwrap(URL(string: "https://example.com/error"))
+
+        MockURLProtocol.requestHandler = { _ in
+            throw URLError(.notConnectedToInternet)
         }
 
-        waitForExpectations(timeout: 2.0)
+        do {
+            _ = try await downloadService.downloadCover(url: url, for: bookID)
+            XCTFail("Expected failure, but succeeded")
+        } catch {
+            if case let .network(urlError) = error {
+                XCTAssertEqual(urlError.code, .notConnectedToInternet)
+            } else {
+                XCTFail("Expected network error, got \(error)")
+            }
+        }
     }
 }

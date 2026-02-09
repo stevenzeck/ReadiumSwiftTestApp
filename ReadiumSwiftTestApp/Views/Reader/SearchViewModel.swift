@@ -72,13 +72,13 @@ class SearchViewModel {
         scrollId = nil
 
         searchTask = Task {
-            let result = await searchService.search(query: query)
+            do {
+                let iterator = try await searchService.search(query: query)
 
-            switch result {
-            case let .success(iterator):
                 self.searchIterator = iterator
                 await loadAllResults(iterator: iterator)
-            case let .failure(error):
+
+            } catch {
                 self.error = error.localizedDescription
                 self.isLoading = false
             }

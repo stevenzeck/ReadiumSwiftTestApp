@@ -35,14 +35,14 @@ class MockSearchService: AppSearchService {
     var iterator: MockSearchIterator?
     var error: SearchError?
 
-    func search(query _: String) async -> SearchResult<SearchIterator> {
+    func search(query _: String) async throws(SearchError) -> SearchIterator {
         if let error = error {
-            return .failure(error)
+            throw error
         }
         if let iterator = iterator {
-            return .success(iterator)
+            return iterator
         }
-        return .failure(.publicationNotSearchable)
+        throw .publicationNotSearchable
     }
 }
 

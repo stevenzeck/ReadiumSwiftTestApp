@@ -9,6 +9,22 @@
 import Foundation
 import Observation
 
+/// Specific errors that can occur during download operations.
+enum DownloadError: Error, Equatable {
+    case network(URLError)
+    case fileSystem(String)
+    case invalidResponse(Int)
+    case unknown(String)
+
+    /// Helper to genericize other errors
+    static func wrap(_ error: Error) -> DownloadError {
+        if let urlError = error as? URLError {
+            return .network(urlError)
+        }
+        return .unknown(error.localizedDescription)
+    }
+}
+
 /// Represents the state of an active download task.
 struct Download: Sendable {
     let id: UUID
@@ -62,10 +78,16 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
         task.resume()
     }
 
-    func downloadCover(url: URL, bookId: UUID) async -> String? {
+    func downloadCover(url: URL, bookId: UUID) async throws(DownloadError) -> String {
         do {
             let (location, response) = try await coverSession.download(from: url)
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw DownloadError.unknown("Invalid response type")
+            }
+
+            guard httpResponse.statusCode == 200 else {
+                throw DownloadError.invalidResponse(httpResponse.statusCode)
+            }
 
             let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let filename = "\(bookId.uuidString)-cover.\(url.pathExtension)"
@@ -77,9 +99,16 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
 
             try FileManager.default.moveItem(at: location, to: destination)
             return filename
+        } catch let error as DownloadError {
+            throw error
+        } catch let error as URLError {
+            throw .network(error)
         } catch {
-            print("Cover save error: \(error)")
-            return nil
+            let nsError = error as NSError
+            if nsError.domain == NSCocoaErrorDomain {
+                throw .fileSystem(nsError.localizedDescription)
+            }
+            throw .unknown(error.localizedDescription)
         }
     }
 
@@ -218,11 +247,9 @@ class DownloadService {
         }
     }
 
-    func downloadCover(url: URL, for bookId: UUID, completion: @escaping (String?) -> Void) {
-        Task {
-            let filename = await manager.downloadCover(url: url, bookId: bookId)
-            completion(filename)
-        }
+    /// Downloads a cover image
+    func downloadCover(url: URL, for bookId: UUID) async throws(DownloadError) -> String {
+        return try await manager.downloadCover(url: url, bookId: bookId)
     }
 
     // MARK: - Internal Handling

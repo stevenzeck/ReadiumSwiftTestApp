@@ -10,12 +10,13 @@ import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import XCTest
 
+@MainActor
 class MockOPDSParsingService: OPDSParsingService {
-    var result: Result<Feed?, Error>?
+    var result: Result<Feed?, OPDSBrowserError>?
 
-    func parseURL(url _: URL) async throws -> Feed? {
+    func parseURL(url _: URL) async throws(OPDSBrowserError) -> Feed? {
         guard let result = result else {
-            throw OPDSBrowserError.unknown
+            throw .unknown
         }
 
         switch result {
@@ -60,7 +61,7 @@ final class OPDSBrowserViewModelTests: XCTestCase {
 
     func testLoadFeedFailure() async throws {
         let url = try XCTUnwrap(URL(string: "https://example.com/opds"))
-        mockService.result = .failure(OPDSBrowserError.unknown)
+        mockService.result = .failure(.unknown)
 
         await viewModel.loadFeed(url: url)
 
