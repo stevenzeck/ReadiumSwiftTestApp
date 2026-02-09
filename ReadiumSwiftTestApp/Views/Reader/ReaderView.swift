@@ -64,7 +64,7 @@ struct ReaderView: UIViewControllerRepresentable {
             let isCenterTap = point.x >= centerZoneX && point.x <= (centerZoneX + centerZoneWidth)
 
             if isCenterTap {
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     withAnimation {
                         self.parent.isChromeVisible.toggle()
                     }
@@ -108,7 +108,6 @@ struct ReaderView: UIViewControllerRepresentable {
                     config: config,
                     httpServer: httpServer
                 )
-
                 navigatorVC = epubNavigator
                 navigatorInstance = epubNavigator
             } catch {
@@ -144,14 +143,12 @@ struct ReaderView: UIViewControllerRepresentable {
             navigatorVC.view.addGestureRecognizer(tapGesture)
 
             if let navigatorInstance = navigatorInstance {
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     onGetNavigator?(navigatorInstance)
                 }
             }
-
             return readerVC
         }
-
         return makeErrorVC("Unknown Error")
     }
 
@@ -169,9 +166,8 @@ struct ReaderView: UIViewControllerRepresentable {
                 Task {
                     await navigator.go(to: locator)
                 }
-
                 // Reset the binding on the main thread to prevent loops
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     self.targetLocator = nil
                 }
             }

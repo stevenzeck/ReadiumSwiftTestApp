@@ -143,6 +143,7 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
 
     private func updateProgress(taskID: Int, written: Int64, total: Int64) {
         guard let id = taskMap[taskID] else { return }
+        guard total > 0 else { return }
         let progress = Double(written) / Double(total)
         continuation.yield(.didUpdateProgress(id: id, progress: progress))
     }
