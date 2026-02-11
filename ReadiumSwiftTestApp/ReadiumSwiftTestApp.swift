@@ -11,6 +11,8 @@ import SwiftUI
 /// The main entry point of the Readium iOS Application.
 @main
 struct ReadiumSwiftTestApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     // MARK: - Services
 
     @State private var readium = ReadiumService()
@@ -23,6 +25,9 @@ struct ReadiumSwiftTestApp: App {
             ContentView()
                 .environment(readium)
                 .environment(downloadService)
+                .onAppear {
+                    downloadService.setupBackgroundHandler(appDelegate: appDelegate)
+                }
         }
         .modelContainer(for: [Book.self, OPDSFeed.self, Bookmark.self, Highlight.self])
     }

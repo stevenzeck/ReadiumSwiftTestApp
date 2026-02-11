@@ -51,6 +51,7 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
     private var session: URLSession!
     private var coverSession: URLSession
     private var taskMap: [Int: UUID] = [:]
+    private var onSessionEventsFinished: (@MainActor () -> Void)?
 
     init(session: URLSession? = nil, configuration: URLSessionConfiguration? = nil, coverSession: URLSession? = nil) {
         self.coverSession = coverSession ?? URLSession.shared
@@ -68,6 +69,10 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
             }()
             self.session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         }
+    }
+
+    func setCompletionHandler(trigger: @escaping @MainActor () -> Void) {
+        onSessionEventsFinished = trigger
     }
 
     // MARK: - Stream Generation
@@ -172,6 +177,16 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
                 await self.handleError(taskID: task.taskIdentifier, error: error)
             }
         }
+    }
+
+    nonisolated func urlSessionDidFinishEvents(forBackgroundURLSession _: URLSession) {
+        Task {
+            await handleSessionFinish()
+        }
+    }
+
+    private func handleSessionFinish() async {
+        await onSessionEventsFinished?()
     }
 
     // MARK: - Actor Logic
@@ -294,6 +309,17 @@ class DownloadService {
             }
         case let .didFail(id, _):
             activeDownloads[id] = nil
+        }
+    }
+
+    func setupBackgroundHandler(appDelegate: AppDelegate) {
+        Task {
+            await manager.setCompletionHandler {
+                if let completion = appDelegate.backgroundSessionCompletionHandler {
+                    appDelegate.backgroundSessionCompletionHandler = nil
+                    completion()
+                }
+            }
         }
     }
 }
