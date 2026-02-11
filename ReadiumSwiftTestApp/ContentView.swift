@@ -9,9 +9,6 @@ import SwiftData
 import SwiftUI
 
 /// The root view of the application interface.
-///
-/// Sets up the main `TabView` navigation structure and acts as a global listener for
-/// background download completions to update the data model.
 struct ContentView: View {
     // MARK: - Environment
 
@@ -35,7 +32,8 @@ struct ContentView: View {
                 }
         }
         .task {
-            for await event in downloadService.downloadEvents {
+            // Consume the stream for database side-effects
+            for await event in await downloadService.downloadEvents {
                 handleDownloadFinish(event)
             }
         }
@@ -43,9 +41,6 @@ struct ContentView: View {
 
     // MARK: - Private Methods
 
-    /// Updates the SwiftData `Book` entity when a background download finishes.
-    ///
-    /// - Parameter event: The download event containing the UUID and file location.
     private func handleDownloadFinish(_ event: DownloadEvent) {
         switch event {
         case let .didFinish(id, location):

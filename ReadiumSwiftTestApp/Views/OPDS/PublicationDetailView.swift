@@ -71,7 +71,8 @@ struct PublicationDetailView: View {
         }
         .navigationTitle("Details")
         .task {
-            for await event in downloadService.downloadEvents {
+            // Listen to events for this specific view (updating button state)
+            for await event in await downloadService.downloadEvents {
                 viewModel.handleDownloadEvent(event)
             }
         }

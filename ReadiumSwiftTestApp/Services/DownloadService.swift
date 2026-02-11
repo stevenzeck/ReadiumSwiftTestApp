@@ -5,12 +5,11 @@
 //  Created by Steven Zeck on 12/30/25.
 //
 
-@preconcurrency import Combine
 import Foundation
 import Observation
 
 /// Specific errors that can occur during download operations.
-public enum DownloadError: Error, Equatable {
+public enum DownloadError: Error, Equatable, Sendable {
     case network(URLError)
     case fileSystem(String)
     case invalidResponse(Int)
@@ -43,18 +42,17 @@ public enum DownloadEvent: Sendable {
 
 /// Actor responsible for handling background downloads.
 actor DownloadManager: NSObject, URLSessionDownloadDelegate {
-    let eventStream: AsyncStream<DownloadEvent>
-    private let continuation: AsyncStream<DownloadEvent>.Continuation
+    // MARK: - Multicast State
+
+    private var continuations: [UUID: AsyncStream<DownloadEvent>.Continuation] = [:]
+
+    // MARK: - Session State
 
     private var session: URLSession!
     private var coverSession: URLSession
     private var taskMap: [Int: UUID] = [:]
 
     init(session: URLSession? = nil, configuration: URLSessionConfiguration? = nil, coverSession: URLSession? = nil) {
-        let (stream, cont) = AsyncStream.makeStream(of: DownloadEvent.self)
-        eventStream = stream
-        continuation = cont
-
         self.coverSession = coverSession ?? URLSession.shared
 
         super.init()
@@ -71,6 +69,36 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
             self.session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         }
     }
+
+    // MARK: - Stream Generation
+
+    /// Creates a new stream listener. This allows multiple consumers (Service, Views, etc.)
+    func makeEventStream() -> AsyncStream<DownloadEvent> {
+        let id = UUID()
+        return AsyncStream { continuation in
+            // Register continuation
+            self.continuations[id] = continuation
+
+            // Handle cleanup when the listener cancels
+            continuation.onTermination = { [weak self] _ in
+                Task { [weak self] in
+                    await self?.removeContinuation(id)
+                }
+            }
+        }
+    }
+
+    private func removeContinuation(_ id: UUID) {
+        continuations.removeValue(forKey: id)
+    }
+
+    private func broadcast(_ event: DownloadEvent) {
+        for continuation in continuations.values {
+            continuation.yield(event)
+        }
+    }
+
+    // MARK: - Operations
 
     func startDownload(url: URL, id: UUID) {
         let task = session.downloadTask(with: url)
@@ -116,15 +144,19 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
 
     nonisolated func urlSession(_: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let tempDir = FileManager.default.temporaryDirectory
-        let tempDst = tempDir.appendingPathComponent(UUID().uuidString)
+        let safeTempURL = tempDir.appendingPathComponent(UUID().uuidString)
 
         do {
-            try FileManager.default.moveItem(at: location, to: tempDst)
+            try FileManager.default.moveItem(at: location, to: safeTempURL)
+
             Task {
-                await self.finalizeDownload(taskID: downloadTask.taskIdentifier, tempLocation: tempDst, originalFilename: downloadTask.originalRequest?.url?.lastPathComponent)
+                await self.finalizeDownload(taskID: downloadTask.taskIdentifier, safeTempLocation: safeTempURL, originalFilename: downloadTask.originalRequest?.url?.lastPathComponent)
             }
         } catch {
-            print("Failed to move temp file: \(error)")
+            print("Critical: Failed to move temp file to safe location: \(error)")
+            Task {
+                await self.handleError(taskID: downloadTask.taskIdentifier, error: error)
+            }
         }
     }
 
@@ -144,10 +176,10 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
 
     // MARK: - Actor Logic
 
-    private func finalizeDownload(taskID: Int, tempLocation: URL, originalFilename: String?) {
+    private func finalizeDownload(taskID: Int, safeTempLocation: URL, originalFilename: String?) {
         defer {
             taskMap[taskID] = nil
-            try? FileManager.default.removeItem(at: tempLocation)
+            try? FileManager.default.removeItem(at: safeTempLocation)
         }
 
         guard let id = taskMap[taskID] else { return }
@@ -163,11 +195,12 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
                 try FileManager.default.removeItem(at: destination)
             }
 
-            try FileManager.default.moveItem(at: tempLocation, to: destination)
-            continuation.yield(.didFinish(id: id, location: destination))
+            try FileManager.default.moveItem(at: safeTempLocation, to: destination)
+
+            broadcast(.didFinish(id: id, location: destination))
         } catch {
             let downloadError: DownloadError = (error as? DownloadError) ?? .fileSystem(error.localizedDescription)
-            continuation.yield(.didFail(id: id, error: downloadError))
+            broadcast(.didFail(id: id, error: downloadError))
         }
     }
 
@@ -175,27 +208,16 @@ actor DownloadManager: NSObject, URLSessionDownloadDelegate {
         guard let id = taskMap[taskID] else { return }
         guard total > 0 else { return }
         let progress = Double(written) / Double(total)
-        continuation.yield(.didUpdateProgress(id: id, progress: progress))
+
+        broadcast(.didUpdateProgress(id: id, progress: progress))
     }
 
     private func handleError(taskID: Int, error: Error) {
         guard let id = taskMap[taskID] else { return }
         let downloadError = DownloadError.wrap(error)
-        continuation.yield(.didFail(id: id, error: downloadError))
+
+        broadcast(.didFail(id: id, error: downloadError))
         taskMap[taskID] = nil
-    }
-}
-
-/// Helper to safely capture AnyCancellable in AsyncStream closure.
-private final class CancellableBox: @unchecked Sendable {
-    private let cancelAction: @Sendable () -> Void
-
-    init(_ cancellable: AnyCancellable) {
-        cancelAction = { cancellable.cancel() }
-    }
-
-    nonisolated func cancel() {
-        cancelAction()
     }
 }
 
@@ -210,18 +232,14 @@ class DownloadService {
     // MARK: - Private
 
     private let manager: DownloadManager
-    private let subject = PassthroughSubject<DownloadEvent, Never>()
 
+    // MARK: - Public APIs
+
+    /// Provides a new asynchronous stream of download events.
+    /// This allows multiple consumers (the Service itself, ContentView, etc.) to listen independently.
     var downloadEvents: AsyncStream<DownloadEvent> {
-        AsyncStream { continuation in
-            let cancellable = subject.sink { event in
-                continuation.yield(event)
-            }
-            let box = CancellableBox(cancellable)
-
-            continuation.onTermination = { _ in
-                box.cancel()
-            }
+        get async {
+            await manager.makeEventStream()
         }
     }
 
@@ -230,10 +248,10 @@ class DownloadService {
     init(manager: DownloadManager? = nil) {
         self.manager = manager ?? DownloadManager()
 
+        // Start listening to update local state
         Task {
-            for await event in self.manager.eventStream {
+            for await event in await self.manager.makeEventStream() {
                 self.handleEvent(event)
-                self.subject.send(event)
             }
         }
     }

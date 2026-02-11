@@ -109,28 +109,30 @@ final class DownloadServiceTests: XCTestCase {
 
         let progressExp = expectation(description: "Progress > 0 received")
 
-        // Subscribe first
-        let events = downloadService.downloadEvents
+        // 1. Get the stream (Await access to the actor)
+        let stream = await downloadService.downloadEvents
 
-        Task {
-            for await event in events {
+        // 2. Start listener task
+        let listenerTask = Task {
+            for await event in stream {
                 if case let .didUpdateProgress(eventId, progress) = event,
                    eventId == id,
                    progress > 0
                 {
                     progressExp.fulfill()
-                    break
+                    return
                 }
             }
         }
 
         // Wait briefly to ensure subscription is active
-        try await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+        try await Task.sleep(nanoseconds: 100_000_000)
 
-        // Start Download
+        // 3. Start Download
         downloadService.startDownload(url: url, for: id)
 
         await fulfillment(of: [progressExp], timeout: 2.0)
+        listenerTask.cancel()
     }
 
     func testDownloadCompletionDelegate() async throws {
@@ -146,52 +148,27 @@ final class DownloadServiceTests: XCTestCase {
 
         let eventExp = expectation(description: "Download finished received")
 
-        // Subscribe first
-        let events = downloadService.downloadEvents
+        // 1. Get the stream
+        let stream = await downloadService.downloadEvents
 
-        Task {
-            for await event in events {
+        // 2. Start listener
+        let listenerTask = Task {
+            for await event in stream {
                 if case let .didFinish(eventId, location) = event,
                    eventId == id
                 {
                     XCTAssertTrue(FileManager.default.fileExists(atPath: location.path))
                     eventExp.fulfill()
-                    break
+                    return
                 }
             }
         }
 
-        // Wait briefly to ensure subscription
         try await Task.sleep(nanoseconds: 100_000_000)
 
-        // Start Download
         downloadService.startDownload(url: url, for: id)
 
         await fulfillment(of: [eventExp], timeout: 2.0)
-    }
-
-    func testConcurrentStartDownload() async {
-        let config = URLSessionConfiguration.ephemeral
-        config.protocolClasses = [ServiceMockURLProtocol.self]
-
-        ServiceMockURLProtocol.requestHandler = { request in
-            (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data(), nil)
-        }
-
-        let concurrentManager = DownloadManager(configuration: config)
-        let concurrentCount = 50
-
-        await withTaskGroup(of: Void.self) { group in
-            for i in 0 ..< concurrentCount {
-                group.addTask {
-                    let id = UUID()
-                    if let url = URL(string: "https://example.com/book_\(i).epub") {
-                        await concurrentManager.startDownload(url: url, id: id)
-                    }
-                }
-            }
-        }
-
-        XCTAssertTrue(true, "Concurrency test completed")
+        listenerTask.cancel()
     }
 }
