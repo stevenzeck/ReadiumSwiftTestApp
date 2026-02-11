@@ -47,6 +47,20 @@ class ReaderViewModel {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documents.appendingPathComponent(book.filePath)
 
+        // Ensure book file exists before trying to open
+        var isReachable = false
+        do {
+            isReachable = try fileURL.checkResourceIsReachable()
+        } catch {
+            self.error = .openFailed(NSError(domain: "FileSystem", code: 404, userInfo: [NSLocalizedDescriptionKey: "Book file not found at path: \(fileURL.path)"]))
+            return
+        }
+
+        if !isReachable {
+            error = .openFailed(NSError(domain: "FileSystem", code: 404, userInfo: [NSLocalizedDescriptionKey: "Book file missing."]))
+            return
+        }
+
         do {
             try await loadPublication(url: fileURL, assetRetriever: assetRetriever)
         } catch {
