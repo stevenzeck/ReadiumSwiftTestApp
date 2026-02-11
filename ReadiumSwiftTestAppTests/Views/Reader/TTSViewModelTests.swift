@@ -5,7 +5,7 @@
 //  Created by Steven Zeck on 2/5/26.
 //
 
-import ReadiumNavigator
+@preconcurrency import ReadiumNavigator
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import XCTest

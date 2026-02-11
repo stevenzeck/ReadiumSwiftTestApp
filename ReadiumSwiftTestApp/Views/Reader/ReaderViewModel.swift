@@ -5,10 +5,9 @@
 //  Created by Steven Zeck on 2/8/26.
 //
 
-import Combine
 import Foundation
 import Observation
-import ReadiumNavigator
+@preconcurrency import ReadiumNavigator
 @preconcurrency import ReadiumShared
 @preconcurrency import ReadiumStreamer
 import SwiftData

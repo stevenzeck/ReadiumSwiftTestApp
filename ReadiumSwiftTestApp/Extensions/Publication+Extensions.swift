@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@preconcurrency import ReadiumShared
+import ReadiumShared
 
 extension Publication {
     /// Finds the first link with an acquisition or enclosure relation.

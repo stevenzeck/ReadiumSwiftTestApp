@@ -5,8 +5,7 @@
 //  Created by Steven Zeck on 12/30/25.
 //
 
-import Combine
-import ReadiumNavigator
+@preconcurrency import ReadiumNavigator
 @preconcurrency import ReadiumShared
 import SwiftData
 import SwiftUI
