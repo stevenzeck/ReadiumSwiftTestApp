@@ -98,19 +98,17 @@ class AddBookURLViewModel {
             throw NSError(domain: "AddBook", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid local file path"])
         }
 
-        let asset = try await readium.assetRetriever.retrieve(url: absoluteURL).get()
-
-        let publication = try await readium.publicationOpener.open(asset: asset, allowUserInteraction: false, sender: nil).get()
+        let (publication, format) = try await readium.openPublication(at: absoluteURL)
 
         let title = publication.metadata.title ?? url.lastPathComponent
         let author = publication.metadata.authors.map { $0.name }.joined(separator: ", ")
-        let format = asset.format.mediaType?.string ?? MediaType.binary.string
+        let formatString = format.mediaType?.string ?? MediaType.binary.string
 
         let newBook = Book(
             id: id,
             title: title,
             author: author.isEmpty ? nil : author,
-            format: format,
+            format: formatString,
             filePath: filename
         )
 

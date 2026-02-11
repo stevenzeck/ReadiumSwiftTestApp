@@ -49,4 +49,20 @@ class ReadiumService {
             )
         )
     }
+
+    // MARK: - Public Methods
+
+    /// Opens a publication from a local or remote URL using the shared AssetRetriever and PublicationOpener.
+    ///
+    /// - Parameters:
+    ///   - url: The file URL or remote URL of the publication.
+    ///   - sender: The sender (optional), used for user interaction callbacks if needed.
+    /// - Returns: A fully parsed `Publication`.
+    func openPublication(at url: AbsoluteURL) async throws -> (Publication, Format) {
+        let asset = try await assetRetriever.retrieve(url: url).get()
+
+        let publication = try await publicationOpener.open(asset: asset, allowUserInteraction: false).get()
+        
+        return (publication, asset.format)
+    }
 }

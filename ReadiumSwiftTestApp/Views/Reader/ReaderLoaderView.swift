@@ -77,7 +77,7 @@ struct ReaderLoaderView: View {
                 } else {
                     ProgressView("Opening...")
                         .task {
-                            await viewModel.openBook(book: book, assetRetriever: readium.assetRetriever)
+                            await viewModel.openBook(book: book, readiumService: readium)
                         }
                 }
             }
