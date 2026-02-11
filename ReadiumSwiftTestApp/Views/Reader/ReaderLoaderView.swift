@@ -36,7 +36,7 @@ struct ReaderLoaderView: View {
     // Transient State (Not persisted in ViewModel)
     @State private var targetLocator: Locator?
     @State private var epubNavigator: EPUBNavigatorViewController?
-    @State private var currentPreferences = EPUBPreferences()
+    @State private var currentPreferences = PreferencesStore.shared.load()
 
     // Highlight Flow State
     @State private var currentSelectionForHighlight: Selection?
@@ -155,6 +155,9 @@ struct ReaderLoaderView: View {
                     currentPreferences: $currentPreferences,
                     ttsViewModel: viewModel.ttsViewModel
                 )
+                .onDisappear {
+                    PreferencesStore.shared.save(currentPreferences)
+                }
             }
         }
         .sheet(isPresented: $showingSearch) {
