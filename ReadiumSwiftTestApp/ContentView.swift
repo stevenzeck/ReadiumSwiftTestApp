@@ -15,6 +15,9 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(DownloadService.self) var downloadService
 
+    @State private var errorMessage: String?
+    @State private var showingError: Bool = false
+
     // MARK: - Body
 
     var body: some View {
@@ -37,6 +40,11 @@ struct ContentView: View {
                 handleDownloadFinish(event)
             }
         }
+        .alert("Download Error", isPresented: $showingError, actions: {
+            Button("OK", role: .cancel) { errorMessage = nil }
+        }, message: {
+            Text(errorMessage ?? "An unknown error occurred.")
+        })
     }
 
     // MARK: - Private Methods
@@ -50,7 +58,19 @@ struct ContentView: View {
                 try? modelContext.save()
             }
 
-        case let .didFail(id, _):
+        case let .didFail(id, error):
+            switch error {
+            case let .network(urlError):
+                errorMessage = "Network error: \(urlError.localizedDescription)"
+            case let .fileSystem(msg):
+                errorMessage = "File error: \(msg)"
+            case let .invalidResponse(code):
+                errorMessage = "Server returned error code: \(code)"
+            case let .unknown(msg):
+                errorMessage = "Error: \(msg)"
+            }
+            showingError = true
+
             let descriptor = FetchDescriptor<Book>(predicate: #Predicate { $0.id == id })
             if let book = try? modelContext.fetch(descriptor).first {
                 modelContext.delete(book)

@@ -34,7 +34,7 @@ struct OPDSFeedListView: View {
                     List {
                         ForEach(feeds) { feed in
                             if let url = URL(string: feed.url) {
-                                NavigationLink(destination: OPDSBrowserView(url: url, title: feed.title)) {
+                                NavigationLink(value: OPDSRoute.feedBrowser(url: url, title: feed.title)) {
                                     feedRow(feed)
                                 }
                                 .swipeActions(edge: .leading) {
@@ -76,6 +76,14 @@ struct OPDSFeedListView: View {
                     Button(action: { viewModel.showingAddFeed = true }) {
                         Label("Add Feed", systemImage: "plus")
                     }
+                }
+            }
+            .navigationDestination(for: OPDSRoute.self) { route in
+                switch route {
+                case let .feedBrowser(url, title):
+                    OPDSBrowserView(url: url, title: title)
+                case let .publicationDetail(pub):
+                    PublicationDetailView(publication: pub)
                 }
             }
             .sheet(isPresented: $viewModel.showingAddFeed) { AddFeedView() }

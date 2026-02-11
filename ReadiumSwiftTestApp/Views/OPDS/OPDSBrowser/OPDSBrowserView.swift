@@ -112,7 +112,7 @@ struct OPDSBrowserView: View {
 
             ForEach(Array(links.enumerated()), id: \.offset) { _, link in
                 if let nextURL = URL(string: link.href, relativeTo: url) {
-                    NavigationLink(destination: OPDSBrowserView(url: nextURL, title: link.title ?? "Link")) {
+                    NavigationLink(value: OPDSRoute.feedBrowser(url: nextURL, title: link.title ?? "Link")) {
                         HStack {
                             Text(link.title ?? "Unknown Link")
                             Spacer()
@@ -142,7 +142,7 @@ struct OPDSBrowserView: View {
                     if let seeAllLink = group.links.first,
                        let nextURL = URL(string: seeAllLink.href, relativeTo: url)
                     {
-                        NavigationLink(destination: OPDSBrowserView(url: nextURL, title: group.metadata.title)) {
+                        NavigationLink(value: OPDSRoute.feedBrowser(url: nextURL, title: group.metadata.title)) {
                             Text("See All")
                                 .font(.subheadline)
                                 .foregroundColor(.blue)
@@ -154,7 +154,7 @@ struct OPDSBrowserView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         ForEach(Array(group.publications.enumerated()), id: \.offset) { _, publication in
-                            NavigationLink(destination: PublicationDetailView(publication: publication)) {
+                            NavigationLink(value: OPDSRoute.publicationDetail(publication)) {
                                 BookGridItem(publication: publication, baseURL: url, width: 140)
                             }
                             .buttonStyle(.plain)
@@ -167,7 +167,7 @@ struct OPDSBrowserView: View {
                     VStack(alignment: .leading) {
                         ForEach(Array(group.navigation.enumerated()), id: \.offset) { _, link in
                             if let nextURL = URL(string: link.href, relativeTo: url) {
-                                NavigationLink(destination: OPDSBrowserView(url: nextURL, title: link.title ?? "More")) {
+                                NavigationLink(value: OPDSRoute.feedBrowser(url: nextURL, title: link.title ?? "More")) {
                                     HStack {
                                         Text(link.title ?? "More")
                                             .foregroundColor(.primary)
@@ -208,7 +208,7 @@ struct OPDSBrowserView: View {
 
                 LazyVGrid(columns: columns, alignment: .leading, spacing: spacing) {
                     ForEach(Array(publications.enumerated()), id: \.offset) { _, publication in
-                        NavigationLink(destination: PublicationDetailView(publication: publication)) {
+                        NavigationLink(value: OPDSRoute.publicationDetail(publication)) {
                             BookGridItem(publication: publication, baseURL: url, width: 140)
                         }
                         .buttonStyle(.plain)

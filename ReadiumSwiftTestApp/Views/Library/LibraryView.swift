@@ -30,9 +30,7 @@ struct LibraryView: View {
     // MARK: - Layout
 
     /// Adaptive grid layout for book covers.
-    let columns = [
-        GridItem(.adaptive(minimum: 140), spacing: 15),
-    ]
+    let columns = [GridItem(.adaptive(minimum: 140), spacing: 15)]
 
     // MARK: - Body
 
@@ -50,10 +48,9 @@ struct LibraryView: View {
                         LazyVGrid(columns: columns, spacing: 20) {
                             ForEach(books) { book in
                                 // Navigation to the Reader
-                                NavigationLink(destination: ReaderLoaderView(book: book)) {
+                                NavigationLink(value: LibraryRoute.reader(book)) {
                                     BookGridItem(book: book, width: 140)
                                 }
-                                // Context Menu for deletion
                                 .contextMenu {
                                     Button(role: .destructive) {
                                         viewModel.bookToDelete = book
@@ -72,18 +69,23 @@ struct LibraryView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
-                        Button("Add from File") {
-                            viewModel.showingFileImporter = true
-                        }
-                        Button("Add from URL") {
-                            viewModel.showingAddURL = true
-                        }
+                        Button("Add from File") { viewModel.showingFileImporter = true }
+                        Button("Add from URL") { viewModel.showingAddURL = true }
                     } label: {
                         Label("Add Book", systemImage: "plus")
                     }
                 }
             }
-            // File Importer for local files (EPUB/PDF)
+            .navigationDestination(for: LibraryRoute.self) { route in
+                switch route {
+                case let .reader(book):
+                    ReaderLoaderView(book: book)
+                case .fileImport:
+                    EmptyView()
+                case .urlImport:
+                    AddBookURLView()
+                }
+            }
             .fileImporter(isPresented: $viewModel.showingFileImporter, allowedContentTypes: [.epub, .pdf]) { result in
                 switch result {
                 case let .success(url):
@@ -108,9 +110,7 @@ struct LibraryView: View {
                         viewModel.deleteBook(book, modelContext: modelContext)
                     }
                 }
-                Button("Cancel", role: .cancel) {
-                    viewModel.bookToDelete = nil
-                }
+                Button("Cancel", role: .cancel) { viewModel.bookToDelete = nil }
             } message: {
                 Text("Are you sure you want to delete '\(viewModel.bookToDelete?.title ?? "this book")'? This cannot be undone.")
             }
