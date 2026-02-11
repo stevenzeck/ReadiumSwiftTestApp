@@ -110,5 +110,6 @@ struct SimplePreferencesView: View {
     /// Submits the current preferences to the navigator.
     private func applyPreferences() {
         navigator.submitPreferences(currentPreferences)
+        PreferencesStore.shared.save(currentPreferences)
     }
 }
