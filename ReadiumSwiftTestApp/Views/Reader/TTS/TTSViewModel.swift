@@ -5,6 +5,7 @@
 //  Created by Steven Zeck on 12/30/25.
 //
 
+import AVFoundation
 import Foundation
 @preconcurrency import ReadiumNavigator
 import ReadiumShared
@@ -117,6 +118,8 @@ class TTSViewModel: TTSServiceDelegate {
     func start() {
         guard let service = service else { return }
 
+        configureAudioSession()
+
         if let navigator = navigator as? Navigator, let currentLocation = navigator.currentLocation {
             service.start(from: currentLocation)
             showControls = true
@@ -125,6 +128,16 @@ class TTSViewModel: TTSServiceDelegate {
             service.start(from: nil)
             showControls = true
             isPlaying = true
+        }
+    }
+
+    private func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .spokenAudio, options: [])
+            try session.setActive(true)
+        } catch {
+            print("Failed to setup audio session: \(error)")
         }
     }
 
