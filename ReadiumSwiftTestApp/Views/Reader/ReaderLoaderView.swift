@@ -55,6 +55,7 @@ struct ReaderLoaderView: View {
                         httpServer: readium.server,
                         isChromeVisible: $isChromeVisible,
                         targetLocator: $targetLocator,
+                        initialLocation: initialLocation,
                         onGetNavigator: { navigator in
                             if let epubNav = navigator as? EPUBNavigatorViewController {
                                 self.epubNavigator = epubNav
@@ -194,6 +195,11 @@ struct ReaderLoaderView: View {
             return Decoration(id: highlight.id.uuidString, locator: locator, style: .highlight(tint: tint))
         }
         navigator.apply(decorations: decorations, in: "highlights")
+    }
+
+    private var initialLocation: Locator? {
+        guard let json = book.lastReadLocationJSON else { return nil }
+        return try? Locator(jsonString: json)
     }
 }
 

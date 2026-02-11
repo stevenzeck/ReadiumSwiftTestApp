@@ -38,6 +38,9 @@ final class Book {
     /// The date the book was added to the library.
     var createdDate: Date
 
+    /// The location of the book where the user left off
+    var lastReadLocationJSON: String?
+
     /// The collection of user-created bookmarks associated with this book.
     @Relationship(deleteRule: .cascade, inverse: \Bookmark.book)
     var bookmarks: [Bookmark] = []

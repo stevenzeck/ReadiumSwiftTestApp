@@ -7,6 +7,7 @@
 
 @preconcurrency import ReadiumNavigator
 @preconcurrency import ReadiumShared
+import SwiftData
 import SwiftUI
 import UIKit
 
@@ -32,15 +33,22 @@ struct ReaderView: UIViewControllerRepresentable {
     /// Target location to navigate to. Set this to trigger navigation.
     @Binding var targetLocator: Locator?
 
+    /// The initial location to go to.
+    let initialLocation: Locator?
+
     /// Callback when navigator is created, to setup preferences.
     var onGetNavigator: ((Navigator) -> Void)?
 
     /// Callback for text selection highlight action (Selection, Color).
     var onHighlight: ((Selection, String) -> Void)?
 
+    // MARK: Environment
+
+    @Environment(\.modelContext) private var modelContext
+
     // MARK: - Coordinator
 
-    class Coordinator: NSObject, UIGestureRecognizerDelegate {
+    class Coordinator: NSObject, UIGestureRecognizerDelegate, EPUBNavigatorDelegate, PDFNavigatorDelegate {
         var parent: ReaderView
 
         init(_ parent: ReaderView) {
@@ -76,6 +84,26 @@ struct ReaderView: UIViewControllerRepresentable {
         func gestureRecognizer(_: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer) -> Bool {
             return true
         }
+
+        @MainActor
+        func navigator(_: Navigator, locationDidChange locator: Locator) {
+            // Update the book model
+            parent.book.lastReadLocationJSON = locator.jsonString
+
+            // Explicitly save to persist immediately
+            try? parent.modelContext.save()
+        }
+
+        /// Handle jump to error (optional but recommended)
+        func navigator(_: Navigator, didJumpTo locator: Locator) {
+            parent.book.lastReadLocationJSON = locator.jsonString
+            try? parent.modelContext.save()
+        }
+
+        @MainActor
+        func navigator(_: Navigator, presentError error: NavigatorError) {
+            print("Navigator error: \(error.localizedDescription)")
+        }
     }
 
     func makeCoordinator() -> Coordinator {
@@ -104,10 +132,11 @@ struct ReaderView: UIViewControllerRepresentable {
 
                 let epubNavigator = try EPUBNavigatorViewController(
                     publication: publication,
-                    initialLocation: nil,
+                    initialLocation: initialLocation,
                     config: config,
                     httpServer: httpServer
                 )
+                epubNavigator.delegate = context.coordinator
                 navigatorVC = epubNavigator
                 navigatorInstance = epubNavigator
             } catch {
@@ -117,9 +146,10 @@ struct ReaderView: UIViewControllerRepresentable {
             do {
                 let pdfNavigator = try PDFNavigatorViewController(
                     publication: publication,
-                    initialLocation: nil,
+                    initialLocation: initialLocation,
                     httpServer: httpServer
                 )
+                pdfNavigator.delegate = context.coordinator
                 navigatorVC = pdfNavigator
                 navigatorInstance = pdfNavigator
             } catch {
@@ -152,7 +182,8 @@ struct ReaderView: UIViewControllerRepresentable {
         return makeErrorVC("Unknown Error")
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context _: Context) {
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        context.coordinator.parent = self
         // uiViewController is ReaderViewController (or error VC)
         guard let readerVC = uiViewController as? ReaderViewController else { return }
 
