@@ -31,6 +31,9 @@ class ReadiumService {
     /// The HTTP client used for network requests.
     let httpClient: HTTPClient
 
+    /// Opener for publications
+    let publicationOpener: PublicationOpener
+
     // MARK: - Initialization
 
     /// Initializes the Readium service and its dependencies.
@@ -38,5 +41,12 @@ class ReadiumService {
         httpClient = DefaultHTTPClient()
         assetRetriever = AssetRetriever(httpClient: httpClient)
         server = GCDHTTPServer(assetRetriever: assetRetriever)
+        publicationOpener = PublicationOpener(
+            parser: DefaultPublicationParser(
+                httpClient: httpClient,
+                assetRetriever: assetRetriever,
+                pdfFactory: DefaultPDFDocumentFactory()
+            )
+        )
     }
 }

@@ -15,6 +15,7 @@ struct AddBookURLView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
     @Environment(DownloadService.self) var downloadService
+    @Environment(ReadiumService.self) var readiumService
 
     // MARK: - State
 
@@ -31,6 +32,12 @@ struct AddBookURLView: View {
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
                 }
+                if let error = viewModel.errorMessage {
+                    Section {
+                        Text(error)
+                            .foregroundStyle(.red)
+                    }
+                }
             }
             .navigationTitle("Add from URL")
             .toolbar {
@@ -39,11 +46,28 @@ struct AddBookURLView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Download") {
-                        viewModel.startDownload(downloadService: downloadService, modelContext: modelContext) {
-                            dismiss()
+                        Task {
+                            if await viewModel.startImport(
+                                readium: readiumService,
+                                downloadService: downloadService,
+                                modelContext: modelContext
+                            ) {
+                                dismiss()
+                            }
                         }
                     }
-                    .disabled(viewModel.urlString.isEmpty)
+                    .disabled(viewModel.urlString.isEmpty || viewModel.isLoading)
+                }
+            }
+            .overlay {
+                if viewModel.isLoading {
+                    ZStack {
+                        Color.black.opacity(0.2).ignoresSafeArea()
+                        ProgressView("Importing...")
+                            .padding()
+                            .background(.regularMaterial)
+                            .cornerRadius(8)
+                    }
                 }
             }
         }

@@ -53,34 +53,38 @@ struct SearchView: View {
                         .padding()
                 }
 
-                ScrollViewReader { proxy in
-                    List {
-                        ForEach(viewModel.results, id: \.self) { locatorDTO in
-                            VStack(alignment: .leading, spacing: 8) {
-                                let textDTO = locatorDTO.text
-                                if textDTO.highlight != nil {
-                                    Text(highlightedText(from: textDTO))
-                                        .font(.subheadline)
-                                        .multilineTextAlignment(.leading)
-                                } else {
-                                    Text(locatorDTO.title ?? "Unknown location")
-                                        .font(.subheadline)
+                if viewModel.results.isEmpty && viewModel.query.isEmpty {
+                    ContentUnavailableView("Search Book", systemImage: "magnifyingglass", description: Text("Enter text to search contents."))
+                } else {
+                    ScrollViewReader { proxy in
+                        List {
+                            ForEach(viewModel.results, id: \.self) { locatorDTO in
+                                VStack(alignment: .leading, spacing: 8) {
+                                    let textDTO = locatorDTO.text
+                                    if textDTO.highlight != nil {
+                                        Text(highlightedText(from: textDTO))
+                                            .font(.subheadline)
+                                            .multilineTextAlignment(.leading)
+                                    } else {
+                                        Text(locatorDTO.title ?? "Unknown location")
+                                            .font(.subheadline)
+                                    }
+                                }
+                                .listRowBackground(locatorDTO == viewModel.lastSelectedLocator ? Color.gray.opacity(0.1) : Color.clear)
+                                .contentShape(Rectangle())
+                                .id(locatorDTO)
+                                .onTapGesture {
+                                    viewModel.lastSelectedLocator = locatorDTO
+                                    onResultSelected(locatorDTO.toReadiumLocator)
+                                    dismiss()
                                 }
                             }
-                            .listRowBackground(locatorDTO == viewModel.lastSelectedLocator ? Color.gray.opacity(0.1) : Color.clear)
-                            .contentShape(Rectangle())
-                            .id(locatorDTO)
-                            .onTapGesture {
-                                viewModel.lastSelectedLocator = locatorDTO
-                                onResultSelected(locatorDTO.toReadiumLocator)
-                                dismiss()
-                            }
                         }
-                    }
-                    .listStyle(.plain)
-                    .onAppear {
-                        if let lastSelected = viewModel.lastSelectedLocator {
-                            proxy.scrollTo(lastSelected, anchor: .center)
+                        .listStyle(.plain)
+                        .onAppear {
+                            if let lastSelected = viewModel.lastSelectedLocator {
+                                proxy.scrollTo(lastSelected, anchor: .center)
+                            }
                         }
                     }
                 }

@@ -94,6 +94,9 @@
     "Edit Feed" : {
 
     },
+    "Enter text to search contents." : {
+
+    },
     "Enter the direct URL to an EPUB or PDF file." : {
 
     },
@@ -113,6 +116,9 @@
 
     },
     "Highlights" : {
+
+    },
+    "Importing..." : {
 
     },
     "Initializing..." : {
@@ -182,6 +188,9 @@
 
     },
     "Search" : {
+
+    },
+    "Search Book" : {
 
     },
     "Search..." : {
