@@ -68,12 +68,8 @@ class ReaderViewModel {
     }
 
     private func loadPublication(url: URL, readiumService: ReadiumService) async throws(BookOpenError) {
-        guard let sourceURL = AnyURL(url: url).absoluteURL else {
-            throw .invalidURL
-        }
-
         do {
-            let (pub, _) = try await readiumService.openPublication(at: sourceURL)
+            let (pub, _) = try await readiumService.openPublication(at: url)
 
             let tocResult = await pub.tableOfContents()
             let toc = (try? tocResult.get()) ?? []

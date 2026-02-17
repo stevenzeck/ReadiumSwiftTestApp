@@ -31,7 +31,7 @@ class AddBookURLViewModel {
 
     /// Smart-imports the book.
     /// - If it's a Manifest (Audiobook/WebPub), it downloads and imports immediately with metadata.
-    /// - If it's a Binary (EPUB/PDF), it queues a background download.
+    /// - If it's a Binary (EPUB/PDF), it opens it remotely to get metadata/cover, then queues a background download.
     func startImport(
         readium: ReadiumService,
         downloadService: DownloadService,
@@ -49,18 +49,22 @@ class AddBookURLViewModel {
 
         do {
             if url.pathExtension.localizedCaseInsensitiveContains("json") {
-                try await importManifest(url: url, readium: readium, downloadService: downloadService, modelContext: modelContext)
+                try await importManifest(url: url, readium: readium, modelContext: modelContext)
                 return true
             } else {
+                let (publication, format) = try await readium.openPublication(at: url)
+
                 let id = UUID()
-                let filename = url.lastPathComponent
-                let newBook = Book(
+
+                await persistBook(
                     id: id,
-                    title: filename,
-                    format: url.pathExtension,
-                    filePath: filename
+                    publication: publication,
+                    format: format,
+                    filename: url.lastPathComponent,
+                    fallbackTitle: url.lastPathComponent,
+                    fallbackFormat: url.pathExtension,
+                    modelContext: modelContext
                 )
-                modelContext.insert(newBook)
 
                 downloadService.startDownload(url: url, for: id)
                 return true
@@ -75,7 +79,6 @@ class AddBookURLViewModel {
     private func importManifest(
         url: URL,
         readium: ReadiumService,
-        downloadService _: DownloadService,
         modelContext: ModelContext
     ) async throws {
         let (data, response) = try await URLSession.shared.data(from: url)
@@ -94,15 +97,33 @@ class AddBookURLViewModel {
         }
         try data.write(to: destination)
 
-        guard let absoluteURL = FileURL(url: destination) else {
-            throw NSError(domain: "AddBook", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid local file path"])
-        }
+        let (publication, format) = try await readium.openPublication(at: destination)
 
-        let (publication, format) = try await readium.openPublication(at: absoluteURL)
+        await persistBook(
+            id: id,
+            publication: publication,
+            format: format,
+            filename: filename,
+            fallbackTitle: url.lastPathComponent,
+            fallbackFormat: MediaType.binary.string,
+            modelContext: modelContext
+        )
+    }
 
-        let title = publication.metadata.title ?? url.lastPathComponent
+    // MARK: - Shared Logic
+
+    private func persistBook(
+        id: UUID,
+        publication: Publication,
+        format: Format,
+        filename: String,
+        fallbackTitle: String,
+        fallbackFormat: String,
+        modelContext: ModelContext
+    ) async {
+        let title = publication.metadata.title ?? fallbackTitle
         let author = publication.metadata.authors.map { $0.name }.joined(separator: ", ")
-        let formatString = format.mediaType?.string ?? MediaType.binary.string
+        let formatString = format.mediaType?.string ?? fallbackFormat
 
         let newBook = Book(
             id: id,
@@ -113,6 +134,7 @@ class AddBookURLViewModel {
         )
 
         if let coverImage = try? await publication.cover().get() {
+            let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let coverFilename = "\(id.uuidString)-cover.png"
             let coverDestination = documents.appendingPathComponent(coverFilename)
 
@@ -121,7 +143,7 @@ class AddBookURLViewModel {
                     try pngData.write(to: coverDestination)
                     newBook.coverPath = coverFilename
                 } catch {
-                    print("Failed to save cover image to disk: \(error)")
+                    print("Failed to save cover image: \(error)")
                 }
             }
         }

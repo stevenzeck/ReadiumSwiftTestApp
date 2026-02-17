@@ -58,11 +58,14 @@ class ReadiumService {
     ///   - url: The file URL or remote URL of the publication.
     ///   - sender: The sender (optional), used for user interaction callbacks if needed.
     /// - Returns: A fully parsed `Publication`.
-    func openPublication(at url: AbsoluteURL) async throws -> (Publication, Format) {
-        let asset = try await assetRetriever.retrieve(url: url).get()
+    func openPublication(at url: URL) async throws -> (Publication, Format) {
+        guard let absoluteURL = AnyURL(url: url).absoluteURL else {
+            throw PublicationError.invalidURL
+        }
+        let asset = try await assetRetriever.retrieve(url: absoluteURL).get()
 
         let publication = try await publicationOpener.open(asset: asset, allowUserInteraction: false).get()
-        
+
         return (publication, asset.format)
     }
 }
