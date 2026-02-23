@@ -13,12 +13,15 @@ import ReadiumShared
 class PreferencesStore {
     static let shared = PreferencesStore()
     private let key = "EPUB_PREFERENCES"
+    private let userDefaults: UserDefaults
 
-    private init() {}
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+    }
 
     /// Loads the saved preferences or returns defaults.
     func load() -> EPUBPreferences {
-        guard let data = UserDefaults.standard.data(forKey: key),
+        guard let data = userDefaults.data(forKey: key),
               let preferences = try? JSONDecoder().decode(EPUBPreferences.self, from: data)
         else {
             return EPUBPreferences()
@@ -29,7 +32,7 @@ class PreferencesStore {
     /// Saves the current preferences to disk.
     func save(_ preferences: EPUBPreferences) {
         if let data = try? JSONEncoder().encode(preferences) {
-            UserDefaults.standard.set(data, forKey: key)
+            userDefaults.set(data, forKey: key)
         }
     }
 }

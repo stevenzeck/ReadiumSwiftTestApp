@@ -89,7 +89,9 @@ struct LibraryView: View {
             .fileImporter(isPresented: $viewModel.showingFileImporter, allowedContentTypes: [.epub, .pdf]) { result in
                 switch result {
                 case let .success(url):
-                    viewModel.importFile(from: url, modelContext: modelContext)
+                    Task {
+                        await viewModel.importFile(from: url, modelContext: modelContext)
+                    }
                 case let .failure(error):
                     print("Import failed: \(error)")
                 }

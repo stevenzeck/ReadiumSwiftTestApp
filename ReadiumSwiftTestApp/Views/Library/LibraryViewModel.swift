@@ -9,6 +9,35 @@ import Foundation
 import Observation
 import SwiftData
 
+import Foundation
+
+/// A Sendable protocol defining asynchronous file system operations.
+protocol FileManaging: Sendable {
+    func documentDirectoryURL() async -> URL
+    func removeItem(at url: URL) async throws
+    func copyItem(at srcURL: URL, to dstURL: URL) async throws
+    func fileExists(atPath path: String) async -> Bool
+}
+
+/// A stateless, Sendable implementation wrapping standard FileManager operations.
+struct DefaultFileManager: FileManaging {
+    func documentDirectoryURL() async -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+    
+    func removeItem(at url: URL) async throws {
+        try FileManager.default.removeItem(at: url)
+    }
+    
+    func copyItem(at srcURL: URL, to dstURL: URL) async throws {
+        try FileManager.default.copyItem(at: srcURL, to: dstURL)
+    }
+    
+    func fileExists(atPath path: String) async -> Bool {
+        FileManager.default.fileExists(atPath: path)
+    }
+}
+
 enum ImportError: LocalizedError {
     case securityScopeAccessDenied
     case fileSystem(String)
@@ -38,6 +67,12 @@ class LibraryViewModel {
     /// Controls the book to be deleted
     var bookToDelete: Book?
 
+    private let fileManager: any FileManaging
+
+    init(fileManager: any FileManaging = DefaultFileManager()) {
+        self.fileManager = fileManager
+    }
+
     // MARK: - Actions
 
     /// Deletes a book from the library and the file system.
@@ -53,15 +88,17 @@ class LibraryViewModel {
         modelContext.delete(book)
 
         // Perform file cleanup in background
+        let fileManager = self.fileManager
+
         Task.detached(priority: .utility) {
-            let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let documents = await fileManager.documentDirectoryURL()
             let fileURL = documents.appendingPathComponent(filePath)
 
-            try? FileManager.default.removeItem(at: fileURL)
+            try? await fileManager.removeItem(at: fileURL)
 
             if let coverPath = coverPath {
                 let coverURL = documents.appendingPathComponent(coverPath)
-                try? FileManager.default.removeItem(at: coverURL)
+                try? await fileManager.removeItem(at: coverURL)
             }
         }
     }
@@ -71,30 +108,30 @@ class LibraryViewModel {
     /// - Parameters:
     ///   - url: The security-scoped URL of the file to import.
     ///   - modelContext: The SwiftData context used for insertion.
-    func importFile(from url: URL, modelContext: ModelContext) {
+    func importFile(from url: URL, modelContext: ModelContext) async {
         do {
-            try performImport(from: url, modelContext: modelContext)
+            try await performImport(from: url, modelContext: modelContext)
         } catch {
             print("Import failed: \(error.localizedDescription)")
         }
     }
 
-    private func performImport(from url: URL, modelContext: ModelContext) throws(ImportError) {
+    private func performImport(from url: URL, modelContext: ModelContext) async throws(ImportError) {
         guard url.startAccessingSecurityScopedResource() else {
             throw .securityScopeAccessDenied
         }
         defer { url.stopAccessingSecurityScopedResource() }
 
         do {
-            let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let documents = await fileManager.documentDirectoryURL()
             let filename = url.lastPathComponent
             let destination = documents.appendingPathComponent(filename)
 
-            if FileManager.default.fileExists(atPath: destination.path) {
-                try FileManager.default.removeItem(at: destination)
+            if await fileManager.fileExists(atPath: destination.path) {
+                try await fileManager.removeItem(at: destination)
             }
 
-            try FileManager.default.copyItem(at: url, to: destination)
+            try await fileManager.copyItem(at: url, to: destination)
 
             let newBook = Book(
                 title: url.deletingPathExtension().lastPathComponent,
