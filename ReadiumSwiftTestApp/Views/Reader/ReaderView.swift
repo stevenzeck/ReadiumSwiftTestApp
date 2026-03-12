@@ -133,8 +133,7 @@ struct ReaderView: UIViewControllerRepresentable {
                 let epubNavigator = try EPUBNavigatorViewController(
                     publication: publication,
                     initialLocation: initialLocation,
-                    config: config,
-                    httpServer: httpServer
+                    config: config
                 )
                 epubNavigator.delegate = context.coordinator
                 navigatorVC = epubNavigator
