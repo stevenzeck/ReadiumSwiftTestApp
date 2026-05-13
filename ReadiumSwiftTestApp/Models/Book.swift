@@ -41,6 +41,9 @@ final class Book {
     /// The location of the book where the user left off
     var lastReadLocationJSON: String?
 
+    /// Whether the book is fully downloaded and available on disk.
+    var isDownloaded: Bool
+
     /// The collection of user-created bookmarks associated with this book.
     @Relationship(deleteRule: .cascade, inverse: \Bookmark.book)
     var bookmarks: [Bookmark] = []
@@ -61,7 +64,8 @@ final class Book {
     ///   - filePath: The relative path to the book file.
     ///   - coverPath: The relative path to the cover image file, if any.
     ///   - createdDate: The date of import. Defaults to the current date.
-    init(id: UUID = UUID(), title: String, author: String? = nil, format: String, filePath: String, coverPath: String? = nil, createdDate: Date = Date()) {
+    ///   - isDownloaded: Whether the book is ready to be read. Defaults to true.
+    init(id: UUID = UUID(), title: String, author: String? = nil, format: String, filePath: String, coverPath: String? = nil, createdDate: Date = Date(), isDownloaded: Bool = true) {
         self.id = id
         self.title = title
         self.author = author
@@ -69,5 +73,6 @@ final class Book {
         self.filePath = filePath
         self.coverPath = coverPath
         self.createdDate = createdDate
+        self.isDownloaded = isDownloaded
     }
 }

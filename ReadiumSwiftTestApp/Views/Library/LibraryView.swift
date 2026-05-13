@@ -51,6 +51,7 @@ struct LibraryView: View {
                                 NavigationLink(value: LibraryRoute.reader(book)) {
                                     BookGridItem(book: book, width: 140)
                                 }
+                                .disabled(!book.isDownloaded)
                                 .contextMenu {
                                     Button(role: .destructive) {
                                         viewModel.bookToDelete = book

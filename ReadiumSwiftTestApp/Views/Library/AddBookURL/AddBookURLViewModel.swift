@@ -63,6 +63,7 @@ class AddBookURLViewModel {
                     filename: url.lastPathComponent,
                     fallbackTitle: url.lastPathComponent,
                     fallbackFormat: url.pathExtension,
+                    isDownloaded: false,
                     modelContext: modelContext
                 )
 
@@ -106,6 +107,7 @@ class AddBookURLViewModel {
             filename: filename,
             fallbackTitle: url.lastPathComponent,
             fallbackFormat: MediaType.binary.string,
+            isDownloaded: true,
             modelContext: modelContext
         )
     }
@@ -119,6 +121,7 @@ class AddBookURLViewModel {
         filename: String,
         fallbackTitle: String,
         fallbackFormat: String,
+        isDownloaded: Bool,
         modelContext: ModelContext
     ) async {
         let title = publication.metadata.title ?? fallbackTitle
@@ -130,7 +133,8 @@ class AddBookURLViewModel {
             title: title,
             author: author.isEmpty ? nil : author,
             format: formatString,
-            filePath: filename
+            filePath: filename,
+            isDownloaded: isDownloaded
         )
 
         if let coverImage = try? await publication.cover().get() {

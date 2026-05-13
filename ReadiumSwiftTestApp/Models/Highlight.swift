@@ -41,7 +41,7 @@ final class Highlight {
     init(id: UUID = UUID(), book: Book, locator: Locator, color: String = "yellow", note: String? = nil) {
         self.id = id
         self.book = book
-        locatorJSON = locator.jsonString ?? "{}"
+        locatorJSON = (try? locator.jsonString()) ?? "{}"
         self.color = color
         self.note = note
         creationDate = Date()

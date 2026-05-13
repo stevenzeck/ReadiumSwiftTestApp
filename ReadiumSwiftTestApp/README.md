@@ -44,7 +44,7 @@ A SwiftUI iOS application using the Readium Swift Toolkit to browse OPDS feeds, 
 *   **UI:** SwiftUI
 *   **Data:** SwiftData (Persists `Book` and `OPDSFeed` models).
 *   **Readium Integration:**
-    *   `ReadiumService`: Manages the `Streamer` and `GCDWebServer`.
+    *   `ReadiumService`: Manages the Readium `AssetRetriever` and `PublicationOpener`.
     *   `ReaderView`: Wraps `EPUBNavigatorViewController` and `PDFNavigatorViewController` using `UIViewControllerRepresentable`.
     *   `OPDSBrowserView`: Uses `ReadiumOPDS` to parse feeds.
 

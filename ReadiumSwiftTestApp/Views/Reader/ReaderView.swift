@@ -24,9 +24,6 @@ struct ReaderView: UIViewControllerRepresentable {
     /// The local book entity.
     let book: Book
 
-    /// The HTTP server instance serving the publication resources.
-    let httpServer: HTTPServer
-
     /// Binding to control the visibility of the navigation bars (chrome).
     @Binding var isChromeVisible: Bool
 
@@ -88,7 +85,7 @@ struct ReaderView: UIViewControllerRepresentable {
         @MainActor
         func navigator(_: Navigator, locationDidChange locator: Locator) {
             // Update the book model
-            parent.book.lastReadLocationJSON = locator.jsonString
+            parent.book.lastReadLocationJSON = try? locator.jsonString()
 
             // Explicitly save to persist immediately
             try? parent.modelContext.save()
@@ -96,7 +93,7 @@ struct ReaderView: UIViewControllerRepresentable {
 
         /// Handle jump to error (optional but recommended)
         func navigator(_: Navigator, didJumpTo locator: Locator) {
-            parent.book.lastReadLocationJSON = locator.jsonString
+            parent.book.lastReadLocationJSON = try? locator.jsonString()
             try? parent.modelContext.save()
         }
 
@@ -145,8 +142,7 @@ struct ReaderView: UIViewControllerRepresentable {
             do {
                 let pdfNavigator = try PDFNavigatorViewController(
                     publication: publication,
-                    initialLocation: initialLocation,
-                    httpServer: httpServer
+                    initialLocation: initialLocation
                 )
                 pdfNavigator.delegate = context.coordinator
                 navigatorVC = pdfNavigator

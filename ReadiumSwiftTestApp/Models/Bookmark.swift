@@ -35,7 +35,7 @@ final class Bookmark {
     init(id: UUID = UUID(), book: Book, locator: Locator) {
         self.id = id
         self.book = book
-        locatorJSON = locator.jsonString ?? "{}"
+        locatorJSON = (try? locator.jsonString()) ?? "{}"
         creationDate = Date()
     }
 

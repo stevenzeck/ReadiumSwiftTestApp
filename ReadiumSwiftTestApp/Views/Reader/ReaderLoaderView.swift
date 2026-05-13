@@ -52,7 +52,6 @@ struct ReaderLoaderView: View {
                     ReaderView(
                         publication: publication,
                         book: book,
-                        httpServer: readium.server,
                         isChromeVisible: $isChromeVisible,
                         targetLocator: $targetLocator,
                         initialLocation: initialLocation,

@@ -30,6 +30,9 @@ struct BookGridItem: View {
     /// The loaded local cover image.
     @State private var localCoverImage: UIImage?
 
+    /// Whether the book is fully downloaded (used for local books).
+    let isDownloaded: Bool
+
     /// An optional fixed width for the item. If `nil`, the view is flexible.
     let width: CGFloat?
 
@@ -43,6 +46,7 @@ struct BookGridItem: View {
     init(book: Book, width: CGFloat? = nil) {
         title = book.title
         author = book.author
+        isDownloaded = book.isDownloaded
         self.width = width
 
         // Resolve cover logic
@@ -71,6 +75,7 @@ struct BookGridItem: View {
     init(publication: Publication, baseURL: URL, width: CGFloat? = nil) {
         title = publication.metadata.title ?? "No Title"
         author = publication.metadata.authors.first?.name
+        isDownloaded = true
         self.width = width
         localCoverPath = nil
 
@@ -90,6 +95,21 @@ struct BookGridItem: View {
                 .frame(width: width, height: 210)
                 .clipped()
                 .cornerRadius(8)
+                .overlay {
+                    if !isDownloaded {
+                        ZStack {
+                            Color.black.opacity(0.4)
+                            VStack(spacing: 10) {
+                                ProgressView()
+                                    .tint(.white)
+                                Text("Downloading...")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+                }
 
             // Metadata
             Text(title)

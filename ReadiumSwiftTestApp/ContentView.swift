@@ -55,6 +55,7 @@ struct ContentView: View {
             let descriptor = FetchDescriptor<Book>(predicate: #Predicate { $0.id == id })
             if let book = try? modelContext.fetch(descriptor).first {
                 book.filePath = location.lastPathComponent
+                book.isDownloaded = true
                 try? modelContext.save()
             }
 
