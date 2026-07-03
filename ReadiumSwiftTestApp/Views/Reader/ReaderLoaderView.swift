@@ -49,28 +49,35 @@ struct ReaderLoaderView: View {
         ZStack {
             Group {
                 if let publication = viewModel.publication {
-                    ReaderView(
-                        publication: publication,
-                        book: book,
-                        isChromeVisible: $isChromeVisible,
-                        targetLocator: $targetLocator,
-                        initialLocation: initialLocation,
-                        onGetNavigator: { navigator in
-                            if let epubNav = navigator as? EPUBNavigatorViewController {
-                                self.epubNavigator = epubNav
-                                epubNav.submitPreferences(currentPreferences)
-                                applySavedHighlights(to: epubNav)
+                    if publication.conforms(to: .audiobook) {
+                        AudiobookView(publication: publication, book: book)
+                            .onAppear {
+                                self.isChromeVisible = true
                             }
-                            viewModel.ttsViewModel.setup(navigator: navigator, publication: publication)
-                        },
-                        onHighlight: { selection, color in
-                            self.currentSelectionForHighlight = selection
-                            self.currentHighlightColor = color
-                            self.highlightNoteText = ""
-                            self.showingHighlightNote = true
-                        }
-                    )
-                    .ignoresSafeArea()
+                    } else {
+                        ReaderView(
+                            publication: publication,
+                            book: book,
+                            isChromeVisible: $isChromeVisible,
+                            targetLocator: $targetLocator,
+                            initialLocation: initialLocation,
+                            onGetNavigator: { navigator in
+                                if let epubNav = navigator as? EPUBNavigatorViewController {
+                                    self.epubNavigator = epubNav
+                                    epubNav.submitPreferences(currentPreferences)
+                                    applySavedHighlights(to: epubNav)
+                                }
+                                viewModel.ttsViewModel.setup(navigator: navigator, publication: publication)
+                            },
+                            onHighlight: { selection, color in
+                                self.currentSelectionForHighlight = selection
+                                self.currentHighlightColor = color
+                                self.highlightNoteText = ""
+                                self.showingHighlightNote = true
+                            }
+                        )
+                        .ignoresSafeArea()
+                    }
                 } else if let error = viewModel.error {
                     Text("Error opening book: \(error.localizedDescription)")
                 } else {
@@ -91,45 +98,45 @@ struct ReaderLoaderView: View {
             }
         }
         .toolbar(isChromeVisible ? .visible : .hidden, for: .navigationBar)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarBackground(isChromeVisible ? .visible : .hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
             if isChromeVisible {
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack {
-                        Button(action: {
-                            if let nav = epubNavigator, let loc = nav.currentLocation {
-                                viewModel.addBookmark(to: book, locator: loc, modelContext: modelContext)
-                                showingBookmarkAlert = true
+                    if epubNavigator != nil {
+                        HStack {
+                            Button(action: {
+                                if let nav = epubNavigator, let loc = nav.currentLocation {
+                                    viewModel.addBookmark(to: book, locator: loc, modelContext: modelContext)
+                                    showingBookmarkAlert = true
+                                }
+                            }) {
+                                Image(systemName: "bookmark")
                             }
-                        }) {
-                            Image(systemName: "bookmark")
-                        }
 
-                        if viewModel.publication?.isSearchable == true {
-                            Button(action: { showingSearch = true }) {
-                                Image(systemName: "magnifyingglass")
+                            if viewModel.publication?.isSearchable == true {
+                                Button(action: { showingSearch = true }) {
+                                    Image(systemName: "magnifyingglass")
+                                }
                             }
-                        }
 
-                        Button(action: {
-                            if viewModel.ttsViewModel.isPlaying {
-                                viewModel.ttsViewModel.stop()
-                            } else {
-                                viewModel.ttsViewModel.start()
+                            Button(action: {
+                                if viewModel.ttsViewModel.isPlaying {
+                                    viewModel.ttsViewModel.stop()
+                                } else {
+                                    viewModel.ttsViewModel.start()
+                                }
+                            }) {
+                                Image(systemName: "speaker.wave.2")
                             }
-                        }) {
-                            Image(systemName: "speaker.wave.2")
-                        }
 
-                        if epubNavigator != nil {
                             Button(action: { showingPreferences = true }) {
                                 Image(systemName: "gear")
                             }
-                        }
 
-                        Button(action: { showingTOC = true }) {
-                            Image(systemName: "list.bullet")
+                            Button(action: { showingTOC = true }) {
+                                Image(systemName: "list.bullet")
+                            }
                         }
                     }
                 }

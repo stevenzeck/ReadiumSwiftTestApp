@@ -37,6 +37,9 @@
     "Are you sure you want to delete these %lld feeds?" : {
 
     },
+    "Audio Preferences" : {
+
+    },
     "Bookmark Saved" : {
 
     },
@@ -45,6 +48,16 @@
     },
     "Cancel" : {
 
+    },
+    "Chapter %lld: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Chapter %1$lld: %2$@"
+          }
+        }
+      }
     },
     "Close" : {
 
@@ -172,6 +185,9 @@
     "Optionally add a note to this highlight." : {
 
     },
+    "Playback Speed" : {
+
+    },
     "Preferences" : {
 
     },
@@ -203,6 +219,9 @@
 
     },
     "Setting up..." : {
+
+    },
+    "Speed: %@" : {
 
     },
     "Tabs" : {

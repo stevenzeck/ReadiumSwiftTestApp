@@ -7,9 +7,9 @@
 
 import Foundation
 import Observation
+@preconcurrency import ReadiumShared
 import SwiftData
-
-import Foundation
+import UIKit
 
 /// A Sendable protocol defining asynchronous file system operations.
 protocol FileManaging: Sendable {
@@ -24,15 +24,15 @@ struct DefaultFileManager: FileManaging {
     func documentDirectoryURL() async -> URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
-    
+
     func removeItem(at url: URL) async throws {
         try FileManager.default.removeItem(at: url)
     }
-    
+
     func copyItem(at srcURL: URL, to dstURL: URL) async throws {
         try FileManager.default.copyItem(at: srcURL, to: dstURL)
     }
-    
+
     func fileExists(atPath path: String) async -> Bool {
         FileManager.default.fileExists(atPath: path)
     }
@@ -105,18 +105,15 @@ class LibraryViewModel {
 
     /// Imports a file from a local URL (e.g. Files app).
     ///
-    /// - Parameters:
-    ///   - url: The security-scoped URL of the file to import.
-    ///   - modelContext: The SwiftData context used for insertion.
-    func importFile(from url: URL, modelContext: ModelContext) async {
+    func importFile(from url: URL, modelContext: ModelContext, readium: ReadiumService) async {
         do {
-            try await performImport(from: url, modelContext: modelContext)
+            try await performImport(from: url, modelContext: modelContext, readium: readium)
         } catch {
             print("Import failed: \(error.localizedDescription)")
         }
     }
 
-    private func performImport(from url: URL, modelContext: ModelContext) async throws(ImportError) {
+    private func performImport(from url: URL, modelContext: ModelContext, readium: ReadiumService) async throws(ImportError) {
         guard url.startAccessingSecurityScopedResource() else {
             throw .securityScopeAccessDenied
         }
@@ -133,11 +130,28 @@ class LibraryViewModel {
 
             try await fileManager.copyItem(at: url, to: destination)
 
+            let (publication, format) = try await readium.openPublication(at: destination)
+            let id = UUID()
+
+            let title = publication.metadata.title ?? url.deletingPathExtension().lastPathComponent
+            let author = publication.metadata.authors.map { $0.name }.joined(separator: ", ")
+
             let newBook = Book(
-                title: url.deletingPathExtension().lastPathComponent,
-                format: url.pathExtension,
-                filePath: filename
+                id: id,
+                title: title,
+                author: author.isEmpty ? nil : author,
+                format: format.mediaType?.string ?? url.pathExtension,
+                filePath: filename,
+                isDownloaded: true
             )
+
+            if let coverImage = try? await publication.cover().get(), let pngData = coverImage.pngData() {
+                let coverFilename = "\(id.uuidString)-cover.png"
+                let coverDestination = documents.appendingPathComponent(coverFilename)
+                try? pngData.write(to: coverDestination)
+                newBook.coverPath = coverFilename
+            }
+
             modelContext.insert(newBook)
 
         } catch {

@@ -5,14 +5,13 @@
 //  Created by Steven Zeck on 2/22/26.
 //
 
-import XCTest
-import ReadiumShared
 import ReadiumNavigator
+import ReadiumShared
 @testable import ReadiumSwiftTestApp
+import XCTest
 
 @MainActor
 final class PreferencesStoreTests: XCTestCase {
-
     var userDefaults: UserDefaults!
     var store: PreferencesStore!
 
@@ -37,7 +36,7 @@ final class PreferencesStoreTests: XCTestCase {
 
     func testSaveAndLoad() {
         let prefs = EPUBPreferences()
-        
+
         store.save(prefs)
 
         XCTAssertNotNil(userDefaults.data(forKey: "EPUB_PREFERENCES"))

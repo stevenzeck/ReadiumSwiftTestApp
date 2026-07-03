@@ -12,7 +12,7 @@ import Foundation
 /// A Sendable wrapper for TTS Utterances.
 ///
 /// We use `SendableLocator` (DTO) to ensure strict concurrency safety.
-struct AppTTSUtterance: Equatable, Sendable {
+struct AppTTSUtterance: Equatable {
     let text: String
     let locator: SendableLocator
 }

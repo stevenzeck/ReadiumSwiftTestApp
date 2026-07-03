@@ -27,6 +27,9 @@ struct LibraryView: View {
     /// Access to the DownloadService to check status (if needed).
     @Environment(DownloadService.self) var downloadService
 
+    /// Access to ReadiumService for parsing imported files.
+    @Environment(ReadiumService.self) var readiumService
+
     // MARK: - Layout
 
     /// Adaptive grid layout for book covers.
@@ -87,11 +90,20 @@ struct LibraryView: View {
                     AddBookURLView()
                 }
             }
-            .fileImporter(isPresented: $viewModel.showingFileImporter, allowedContentTypes: [.epub, .pdf]) { result in
+            .fileImporter(
+                isPresented: $viewModel.showingFileImporter,
+                allowedContentTypes: [
+                    .epub,
+                    .pdf,
+                    .zip,
+                    UTType(filenameExtension: "audiobook") ?? .data,
+                    UTType(filenameExtension: "zab") ?? .data,
+                ]
+            ) { result in
                 switch result {
                 case let .success(url):
                     Task {
-                        await viewModel.importFile(from: url, modelContext: modelContext)
+                        await viewModel.importFile(from: url, modelContext: modelContext, readium: readiumService)
                     }
                 case let .failure(error):
                     print("Import failed: \(error)")

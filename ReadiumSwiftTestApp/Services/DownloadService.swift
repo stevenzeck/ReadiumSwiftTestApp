@@ -25,7 +25,7 @@ public enum DownloadError: Error, Equatable, Sendable {
 }
 
 /// Represents the state of an active download task.
-struct Download: Sendable {
+struct Download {
     let id: UUID
     let url: URL
     var progress: Double = 0.0

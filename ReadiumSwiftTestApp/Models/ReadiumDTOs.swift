@@ -10,7 +10,7 @@ import ReadiumShared
 
 /// A Sendable, codable struct representation of a Readium Locator.
 /// Use this when passing location data between Actors, persisting data, or in ViewModels.
-struct SendableLocator: Codable, Sendable, Equatable, Hashable {
+struct SendableLocator: Codable, Equatable, Hashable {
     let href: String
     let type: String
     let title: String?
@@ -38,7 +38,7 @@ struct SendableLocator: Codable, Sendable, Equatable, Hashable {
     }
 }
 
-struct LocationsDTO: Codable, Sendable, Equatable, Hashable {
+struct LocationsDTO: Codable, Equatable, Hashable {
     let fragments: [String]
     let progression: Double?
     let position: Int?
@@ -61,7 +61,7 @@ struct LocationsDTO: Codable, Sendable, Equatable, Hashable {
     }
 }
 
-struct TextDTO: Codable, Sendable, Equatable, Hashable {
+struct TextDTO: Codable, Equatable, Hashable {
     let after: String?
     let before: String?
     let highlight: String?
