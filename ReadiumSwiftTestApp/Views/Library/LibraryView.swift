@@ -117,7 +117,11 @@ struct LibraryView: View {
                 "Delete Book?",
                 isPresented: Binding(
                     get: { viewModel.bookToDelete != nil },
-                    set: { if !$0 { viewModel.bookToDelete = nil } }
+                    set: {
+                        if !$0 {
+                            viewModel.bookToDelete = nil
+                        }
+                    }
                 )
             ) {
                 Button("Delete", role: .destructive) {

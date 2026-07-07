@@ -11,52 +11,13 @@ import Testing
 
 @Suite(.serialized) @MainActor
 final class DownloadServiceTests {
-    // MARK: - Local Mock Protocol
-
-    /// Unique class here to avoid colliding with DownloadCoverTests' MockURLProtocol
-    private class ServiceMockURLProtocol: URLProtocol {
-        nonisolated(unsafe) static var requestHandler: ((URLRequest) -> (HTTPURLResponse, Data?, Error?))?
-
-        override class func canInit(with _: URLRequest) -> Bool {
-            true
-        }
-
-        override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-            request
-        }
-
-        override func startLoading() {
-            guard let client = client, let handler = ServiceMockURLProtocol.requestHandler else { return }
-
-            let (response, data, error) = handler(request)
-
-            if let error = error {
-                client.urlProtocol(self, didFailWithError: error)
-                return
-            }
-
-            // Send Headers
-            client.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-
-            // Send Data
-            if let data = data {
-                client.urlProtocol(self, didLoad: data)
-            }
-
-            // Finish
-            client.urlProtocolDidFinishLoading(self)
-        }
-
-        override func stopLoading() {}
-    }
-
     deinit {
-        ServiceMockURLProtocol.requestHandler = nil
+        MockURLProtocol.requestHandler = nil
     }
 
     func makeSUT() -> (DownloadService, DownloadManager) {
         let config = URLSessionConfiguration.ephemeral
-        config.protocolClasses = [ServiceMockURLProtocol.self]
+        config.protocolClasses = [MockURLProtocol.self]
 
         let manager = DownloadManager(configuration: config)
         let service = DownloadService(manager: manager)
@@ -71,7 +32,7 @@ final class DownloadServiceTests {
         let url = try #require(URL(string: "https://example.com/book.epub"))
 
         // Setup Mock
-        ServiceMockURLProtocol.requestHandler = { request in
+        MockURLProtocol.requestHandler = { request in
             (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data(), nil)
         }
 
@@ -94,7 +55,7 @@ final class DownloadServiceTests {
         let url = try #require(URL(string: "https://example.com/test.epub"))
 
         // Setup Mock with Content-Length so progress can be calculated
-        ServiceMockURLProtocol.requestHandler = { request in
+        MockURLProtocol.requestHandler = { request in
             let data = Data(count: 1024)
             let response = HTTPURLResponse(
                 url: request.url!,
@@ -137,7 +98,7 @@ final class DownloadServiceTests {
         let id = UUID()
         let url = try #require(URL(string: "https://example.com/complete.epub"))
 
-        ServiceMockURLProtocol.requestHandler = { request in
+        MockURLProtocol.requestHandler = { request in
             let data = "Dummy Content".data(using: .utf8)!
             return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, data, nil)
         }

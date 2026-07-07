@@ -9,61 +9,6 @@ import Foundation
 @testable import ReadiumSwiftTestApp
 import Testing
 
-/// Helper to intercept URL requests
-class MockURLProtocol: URLProtocol {
-    // MARK: - Thread-Safe Storage
-
-    /// A lock to protect access to the shared request handler.
-    private static let lock = NSLock()
-
-    /// The backing storage.
-    private nonisolated(unsafe) static var _requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
-
-    /// Public thread-safe accessor for the request handler.
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))? {
-        get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _requestHandler
-        }
-        set {
-            lock.lock()
-            defer { lock.unlock() }
-            _requestHandler = newValue
-        }
-    }
-
-    // MARK: - URLProtocol Overrides
-
-    override class func canInit(with _: URLRequest) -> Bool {
-        return true
-    }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        return request
-    }
-
-    override func startLoading() {
-        let handler = Self.requestHandler
-
-        guard let handler = handler else {
-            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
-            return
-        }
-
-        do {
-            let (response, data) = try handler(request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
-        }
-    }
-
-    override func stopLoading() {}
-}
-
 @Suite(.serialized) @MainActor
 final class DownloadCoverTests {
     var downloadService: DownloadService
@@ -89,7 +34,7 @@ final class DownloadCoverTests {
         MockURLProtocol.requestHandler = { request in
             #expect(request.url == url)
             let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
-            return (response, dummyData)
+            return (response, dummyData, nil)
         }
 
         do {
@@ -107,7 +52,7 @@ final class DownloadCoverTests {
 
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
-            return (response, Data())
+            return (response, Data(), nil)
         }
 
         do {

@@ -104,7 +104,7 @@ struct BookTests {
         context.delete(book)
         try context.save()
 
-        #expect(try context.fetch(FetchDescriptor<Bookmark>()).count == 0)
-        #expect(try context.fetch(FetchDescriptor<Highlight>()).count == 0)
+        #expect(try context.fetch(FetchDescriptor<Bookmark>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<Highlight>()).isEmpty)
     }
 }

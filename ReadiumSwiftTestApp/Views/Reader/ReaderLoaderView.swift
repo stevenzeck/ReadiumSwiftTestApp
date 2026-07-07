@@ -181,7 +181,9 @@ struct ReaderLoaderView: View {
             Button("Save") {
                 if let selection = currentSelectionForHighlight {
                     viewModel.saveHighlight(to: book, selection: selection, color: currentHighlightColor, note: highlightNoteText, modelContext: modelContext)
-                    if let nav = epubNavigator { applySavedHighlights(to: nav) }
+                    if let nav = epubNavigator {
+                        applySavedHighlights(to: nav)
+                    }
                 }
             }
             Button("Cancel", role: .cancel) {}

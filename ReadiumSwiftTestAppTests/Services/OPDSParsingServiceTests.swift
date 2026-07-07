@@ -11,54 +11,10 @@ import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import Testing
 
-/// Independent MockURLProtocol for this test file
-class OPDSMockURLProtocol: Foundation.URLProtocol {
-    nonisolated(unsafe) static var mockData: Data?
-    nonisolated(unsafe) static var mockError: Error?
-    nonisolated(unsafe) static var mockStatusCode: Int = 200
-
-    override class func canInit(with _: URLRequest) -> Bool {
-        true
-    }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        return request
-    }
-
-    override func startLoading() {
-        if let error = OPDSMockURLProtocol.mockError {
-            client?.urlProtocol(self, didFailWithError: error)
-        } else {
-            let response = HTTPURLResponse(
-                url: request.url!,
-                statusCode: OPDSMockURLProtocol.mockStatusCode,
-                httpVersion: nil,
-                headerFields: ["Content-Type": "application/opds+json"]
-            )!
-
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-
-            if let data = OPDSMockURLProtocol.mockData {
-                client?.urlProtocol(self, didLoad: data)
-            }
-
-            client?.urlProtocolDidFinishLoading(self)
-        }
-    }
-
-    override func stopLoading() {}
-}
-
 @Suite(.serialized) @MainActor
 final class OPDSParsingServiceTests {
-    init() {
-        URLProtocol.registerClass(OPDSMockURLProtocol.self)
-    }
-
     deinit {
-        URLProtocol.unregisterClass(OPDSMockURLProtocol.self)
-        OPDSMockURLProtocol.mockData = nil
-        OPDSMockURLProtocol.mockError = nil
+        MockURLProtocol.requestHandler = nil
     }
 
     @Test func parseValidOPDS2Feed() async throws {
@@ -74,11 +30,19 @@ final class OPDSParsingServiceTests {
             ]
         }
         """
-        OPDSMockURLProtocol.mockData = jsonString.data(using: .utf8)
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: ["Content-Type": "application/opds+json"]
+            )!
+            return (response, jsonString.data(using: .utf8), nil)
+        }
 
         // Inject DefaultHTTPClient with mock config
         let config = URLSessionConfiguration.ephemeral
-        config.protocolClasses = [OPDSMockURLProtocol.self]
+        config.protocolClasses = [MockURLProtocol.self]
         let client = DefaultHTTPClient(configuration: config)
 
         let service = ReadiumOPDSParsingService(client: client)
@@ -94,10 +58,18 @@ final class OPDSParsingServiceTests {
     }
 
     @Test func parseFailure() async throws {
-        OPDSMockURLProtocol.mockError = NSError(domain: "test", code: -1, userInfo: nil)
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: ["Content-Type": "application/opds+json"]
+            )!
+            return (response, nil, NSError(domain: "test", code: -1, userInfo: nil))
+        }
 
         let config = URLSessionConfiguration.ephemeral
-        config.protocolClasses = [OPDSMockURLProtocol.self]
+        config.protocolClasses = [MockURLProtocol.self]
         let client = DefaultHTTPClient(configuration: config)
 
         let service = ReadiumOPDSParsingService(client: client)
