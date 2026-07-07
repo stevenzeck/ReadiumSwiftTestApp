@@ -5,8 +5,9 @@
 //  Created by Steven Zeck on 2/5/26.
 //
 
+import Foundation
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
 /// Helper to intercept URL requests
 class MockURLProtocol: URLProtocol {
@@ -63,11 +64,11 @@ class MockURLProtocol: URLProtocol {
     override func stopLoading() {}
 }
 
-@MainActor
-final class DownloadCoverTests: XCTestCase {
-    var downloadService: DownloadService!
+@Suite(.serialized) @MainActor
+final class DownloadCoverTests {
+    var downloadService: DownloadService
 
-    override func setUp() async throws {
+    init() {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
         let mockSession = URLSession(configuration: config)
@@ -76,33 +77,33 @@ final class DownloadCoverTests: XCTestCase {
         downloadService = DownloadService(manager: manager)
     }
 
-    override func tearDown() {
+    deinit {
         MockURLProtocol.requestHandler = nil
     }
 
-    func testDownloadCoverSuccess() async throws {
+    @Test func downloadCoverSuccess() async throws {
         let bookID = UUID()
-        let url = try XCTUnwrap(URL(string: "https://example.com/cover.jpg"))
+        let url = try #require(URL(string: "https://example.com/cover.jpg"))
         let dummyData = "imagedata".data(using: .utf8)!
 
         MockURLProtocol.requestHandler = { request in
-            XCTAssertEqual(request.url, url)
+            #expect(request.url == url)
             let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
             return (response, dummyData)
         }
 
         do {
             let filename = try await downloadService.downloadCover(url: url, for: bookID)
-            XCTAssertTrue(filename.contains(bookID.uuidString))
-            XCTAssertTrue(filename.hasSuffix("jpg"))
+            #expect(filename.contains(bookID.uuidString))
+            #expect(filename.hasSuffix("jpg"))
         } catch {
-            XCTFail("Expected success, but got error: \(error)")
+            Issue.record("Expected success, but got error: \(error)")
         }
     }
 
-    func testDownloadCoverNotFound() async throws {
+    @Test func downloadCoverNotFound() async throws {
         let bookID = UUID()
-        let url = try XCTUnwrap(URL(string: "https://example.com/missing.jpg"))
+        let url = try #require(URL(string: "https://example.com/missing.jpg"))
 
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
@@ -111,19 +112,19 @@ final class DownloadCoverTests: XCTestCase {
 
         do {
             _ = try await downloadService.downloadCover(url: url, for: bookID)
-            XCTFail("Expected failure, but succeeded")
+            Issue.record("Expected failure, but succeeded")
         } catch {
             if case let .invalidResponse(code) = error {
-                XCTAssertEqual(code, 404)
+                #expect(code == 404)
             } else {
-                XCTFail("Expected invalidResponse(404), got \(error)")
+                Issue.record("Expected invalidResponse(404), got \(error)")
             }
         }
     }
 
-    func testDownloadCoverNetworkError() async throws {
+    @Test func downloadCoverNetworkError() async throws {
         let bookID = UUID()
-        let url = try XCTUnwrap(URL(string: "https://example.com/error"))
+        let url = try #require(URL(string: "https://example.com/error"))
 
         MockURLProtocol.requestHandler = { _ in
             throw URLError(.notConnectedToInternet)
@@ -131,12 +132,12 @@ final class DownloadCoverTests: XCTestCase {
 
         do {
             _ = try await downloadService.downloadCover(url: url, for: bookID)
-            XCTFail("Expected failure, but succeeded")
+            Issue.record("Expected failure, but succeeded")
         } catch {
             if case let .network(urlError) = error {
-                XCTAssertEqual(urlError.code, .notConnectedToInternet)
+                #expect(urlError.code == .notConnectedToInternet)
             } else {
-                XCTFail("Expected network error, got \(error)")
+                Issue.record("Expected network error, got \(error)")
             }
         }
     }

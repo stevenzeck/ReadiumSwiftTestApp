@@ -5,21 +5,22 @@
 //  Created by Steven Zeck on 7/2/26
 //
 
+import Foundation
 @preconcurrency import ReadiumNavigator
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import SwiftData
-import XCTest
+import Testing
 
-@MainActor
-final class AudiobookViewModelTests: XCTestCase {
-    var viewModel: AudiobookViewModel!
-    var mockContainer: ModelContext!
+@Suite(.serialized) @MainActor
+struct AudiobookViewModelTests {
+    let viewModel: AudiobookViewModel
+    let mockContainer: ModelContext
 
-    override func setUp() async throws {
-        try await super.setUp()
+    init() throws {
         let container = try TestHelper.makeInMemoryContainer()
-        mockContainer = ModelContext(container)
+        let context = ModelContext(container)
+        mockContainer = context
 
         let metadata = Metadata(title: "Test Audiobook")
         let manifest = Manifest(metadata: metadata, readingOrder: [
@@ -30,38 +31,33 @@ final class AudiobookViewModelTests: XCTestCase {
 
         let book = Book(title: "Test Audiobook", format: "audiobook", filePath: "dummy")
 
-        viewModel = AudiobookViewModel(publication: publication, book: book)
-        viewModel.modelContext = mockContainer
+        let viewModel = AudiobookViewModel(publication: publication, book: book)
+        viewModel.modelContext = context
+        self.viewModel = viewModel
     }
 
-    override func tearDown() async throws {
-        viewModel = nil
-        mockContainer = nil
-        try await super.tearDown()
+    @Test func initialState() {
+        #expect(viewModel.bookTitle == "Test Audiobook")
+        #expect(viewModel.playbackInfo.state == .loading)
     }
 
-    func testInitialState() {
-        XCTAssertEqual(viewModel.bookTitle, "Test Audiobook")
-        XCTAssertEqual(viewModel.playbackInfo.state, .loading)
-    }
-
-    func testChapterTitle() {
+    @Test func chapterTitle() {
         let info = MediaPlaybackInfo(resourceIndex: 0, state: .playing, time: 0, duration: 100)
         viewModel.playbackInfo = info
-        XCTAssertEqual(viewModel.currentChapterTitle, "Chapter 1")
-        XCTAssertEqual(viewModel.chapterNumber, 1)
+        #expect(viewModel.currentChapterTitle == "Chapter 1")
+        #expect(viewModel.chapterNumber == 1)
 
         let info2 = MediaPlaybackInfo(resourceIndex: 1, state: .playing, time: 0, duration: 100)
         viewModel.playbackInfo = info2
-        XCTAssertEqual(viewModel.currentChapterTitle, "Chapter 2")
-        XCTAssertEqual(viewModel.chapterNumber, 2)
+        #expect(viewModel.currentChapterTitle == "Chapter 2")
+        #expect(viewModel.chapterNumber == 2)
     }
 
-    func testSeekSliderChanged() {
+    @Test func seekSliderChanged() {
         let info = MediaPlaybackInfo(resourceIndex: 0, state: .playing, time: 0, duration: 100)
         viewModel.playbackInfo = info
 
         viewModel.seekSliderChanged(progress: 0.5)
-        XCTAssertEqual(viewModel.playbackInfo.duration, 100)
+        #expect(viewModel.playbackInfo.duration == 100)
     }
 }

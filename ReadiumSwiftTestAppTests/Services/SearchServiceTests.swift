@@ -5,9 +5,10 @@
 //  Created by Steven Zeck on 2/6/26.
 //
 
+import Foundation
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
 /// Mock for the internal Readium Search Service (Protocol from ReadiumShared)
 class MockReadiumSearchService: ReadiumShared.SearchService {
@@ -43,9 +44,9 @@ class MinimalMockIterator: SearchIterator {
     }
 }
 
-@MainActor
-final class SearchServiceTests: XCTestCase {
-    func testSearchInvocation() async {
+@Suite(.serialized) @MainActor
+struct SearchServiceTests {
+    @Test func searchInvocation() async throws {
         // 1. Setup a Publication with our MockReadiumSearchService injected
         let mockReadiumService = MockReadiumSearchService()
 
@@ -63,14 +64,13 @@ final class SearchServiceTests: XCTestCase {
         // 3. Call search
         let query = "Find Me"
         do {
-            let iterator = try await service.search(query: query)
-            XCTAssertNotNil(iterator, "Search should return a valid iterator")
+            _ = try await service.search(query: query)
         } catch {
-            XCTFail("Search failed with error: \(error)")
+            Issue.record("Search failed with error: \(error)")
         }
     }
 
-    func testSearchWhenNotSearchable() async {
+    @Test func searchWhenNotSearchable() async throws {
         // 1. Setup a Publication WITHOUT a search service
         let publication = Publication(
             manifest: Manifest(metadata: Metadata(title: "Plain Book"))
@@ -81,12 +81,12 @@ final class SearchServiceTests: XCTestCase {
 
         do {
             _ = try await service.search(query: "query")
-            XCTFail("Should fail if publication is not searchable")
+            Issue.record("Should fail if publication is not searchable")
         } catch {
             if case .publicationNotSearchable = error {
-                XCTAssertTrue(true)
+                #expect(true)
             } else {
-                XCTFail("Expected .publicationNotSearchable, got \(error)")
+                Issue.record("Expected .publicationNotSearchable, got \(error)")
             }
         }
     }

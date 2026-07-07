@@ -5,41 +5,41 @@
 //  Created by Steven Zeck on 2/6/26.
 //
 
+import Foundation
 @preconcurrency import ReadiumNavigator
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
-@MainActor
-final class TTSServiceTests: XCTestCase {
-    var publication: Publication!
+@Suite(.serialized) @MainActor
+struct TTSServiceTests {
+    let publication: Publication
 
-    override func setUp() async throws {
-        try await super.setUp()
+    init() {
         publication = Publication(manifest: Manifest(metadata: Metadata(title: "Test Pub")))
     }
 
-    func testMockTTSService() throws {
+    @Test func mockTTSService() throws {
         let mockService = MockTTSService()
 
         // Test Start
-        let locator = try Locator(href: XCTUnwrap(AnyURL(string: "chap1")), mediaType: .html)
+        let locator = try Locator(href: #require(AnyURL(string: "chap1")), mediaType: .html)
         mockService.start(from: locator)
-        XCTAssertTrue(mockService.startCalled)
-        XCTAssertEqual(mockService.startLocator?.href, locator.href)
+        #expect(mockService.startCalled)
+        #expect(try #require(mockService.startLocator?.href).isEquivalentTo(locator.href))
 
         // Test Stop
         mockService.stop()
-        XCTAssertTrue(mockService.stopCalled)
-        XCTAssertFalse(mockService.isPlaying)
+        #expect(mockService.stopCalled)
+        #expect(!mockService.isPlaying)
     }
 
-    func testTTSUtteranceStruct() throws {
+    @Test func ttsUtteranceStruct() throws {
         // Verify the app's wrapper struct holds data correctly
-        let locator = try Locator(href: XCTUnwrap(AnyURL(string: "chap1")), mediaType: .html)
+        let locator = try Locator(href: #require(AnyURL(string: "chap1")), mediaType: .html)
         let utterance = AppTTSUtterance(text: "Hello World", locator: locator)
 
-        XCTAssertEqual(utterance.text, "Hello World")
-        XCTAssertEqual(utterance.locator.href, locator.href)
+        #expect(utterance.text == "Hello World")
+        #expect(utterance.locator.href.isEquivalentTo(locator.href))
     }
 }

@@ -5,43 +5,41 @@
 //  Created by Steven Zeck on 2/22/26.
 //
 
+import Foundation
 import ReadiumNavigator
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
-@MainActor
-final class PreferencesStoreTests: XCTestCase {
-    var userDefaults: UserDefaults!
-    var store: PreferencesStore!
+@Suite(.serialized) @MainActor
+final class PreferencesStoreTests {
+    let userDefaults: UserDefaults
+    let store: PreferencesStore
 
-    override func setUp() async throws {
-        try await super.setUp()
-        userDefaults = UserDefaults(suiteName: "PreferencesStoreTests")
-        userDefaults.removePersistentDomain(forName: "PreferencesStoreTests")
-        store = PreferencesStore(userDefaults: userDefaults)
+    init() {
+        let defaults = UserDefaults(suiteName: "PreferencesStoreTests")!
+        defaults.removePersistentDomain(forName: "PreferencesStoreTests")
+        userDefaults = defaults
+        store = PreferencesStore(userDefaults: defaults)
     }
 
-    override func tearDown() async throws {
-        userDefaults.removePersistentDomain(forName: "PreferencesStoreTests")
-        userDefaults = nil
-        store = nil
-        try await super.tearDown()
+    deinit {
+        UserDefaults(suiteName: "PreferencesStoreTests")?.removePersistentDomain(forName: "PreferencesStoreTests")
     }
 
-    func testLoadDefaults() {
+    @Test func loadDefaults() {
         let prefs = store.load()
-        XCTAssertEqual(prefs, EPUBPreferences())
+        #expect(prefs == EPUBPreferences())
     }
 
-    func testSaveAndLoad() {
+    @Test func saveAndLoad() {
         let prefs = EPUBPreferences()
 
         store.save(prefs)
 
-        XCTAssertNotNil(userDefaults.data(forKey: "EPUB_PREFERENCES"))
+        #expect(userDefaults.data(forKey: "EPUB_PREFERENCES") != nil)
 
         let loaded = store.load()
-        XCTAssertEqual(loaded, prefs)
+        #expect(loaded == prefs)
     }
 }

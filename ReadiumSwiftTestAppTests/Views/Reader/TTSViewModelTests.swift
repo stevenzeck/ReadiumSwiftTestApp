@@ -5,10 +5,11 @@
 //  Created by Steven Zeck on 2/5/26.
 //
 
+import Foundation
 @preconcurrency import ReadiumNavigator
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
 @MainActor
 class MockTTSService: TTSService {
@@ -106,101 +107,111 @@ class MockNavigator: Navigator, DecorableNavigator {
     }
 }
 
-@MainActor
-final class TTSViewModelTests: XCTestCase {
-    var viewModel: TTSViewModel!
-    var mockFactory: MockTTSServiceFactory!
-    var mockNavigator: MockNavigator!
+@Suite(.serialized) @MainActor
+struct TTSViewModelTests {
+    let viewModel: TTSViewModel
+    let mockFactory: MockTTSServiceFactory
+    let mockNavigator: MockNavigator
 
-    override func setUp() async throws {
-        try await super.setUp()
-        mockFactory = MockTTSServiceFactory()
-        mockNavigator = MockNavigator()
+    init() {
+        let mockFactory = MockTTSServiceFactory()
+        let mockNavigator = MockNavigator()
+        self.mockFactory = mockFactory
+        self.mockNavigator = mockNavigator
         viewModel = TTSViewModel(ttsFactory: mockFactory)
     }
 
-    override func tearDown() async throws {
-        viewModel = nil
-        mockFactory = nil
-        mockNavigator = nil
-        try await super.tearDown()
-    }
-
-    func testStartStop() throws {
+    @Test func startStop() async {
         let metadata = Metadata(title: "Test Book")
         let manifest = Manifest(metadata: metadata)
         let publication = Publication(manifest: manifest)
 
         // Pass MockNavigator as Navigator
-        try viewModel.setup(navigator: XCTUnwrap(mockNavigator), publication: publication)
+        viewModel.setup(navigator: mockNavigator, publication: publication)
 
         viewModel.start()
 
-        XCTAssertTrue(mockFactory.service.startCalled)
+        #expect(mockFactory.service.startCalled)
 
         // Check ViewModel state
-        let pred = NSPredicate { _, _ in
-            self.viewModel.isPlaying && self.viewModel.showControls
+        var attempts = 0
+        while !viewModel.isPlaying || !viewModel.showControls, attempts < 200 {
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            attempts += 1
         }
-        let exp = XCTNSPredicateExpectation(predicate: pred, object: nil)
-        wait(for: [exp], timeout: 2.0)
+        #expect(viewModel.isPlaying)
+        #expect(viewModel.showControls)
 
         viewModel.stop()
 
-        XCTAssertTrue(mockFactory.service.stopCalled)
+        #expect(mockFactory.service.stopCalled)
 
-        let predStop = NSPredicate { _, _ in
-            !self.viewModel.isPlaying && !self.viewModel.showControls
+        attempts = 0
+        while viewModel.isPlaying || viewModel.showControls, attempts < 200 {
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            attempts += 1
         }
-        let expStop = XCTNSPredicateExpectation(predicate: predStop, object: nil)
-        wait(for: [expStop], timeout: 2.0)
+        #expect(!viewModel.isPlaying)
+        #expect(!viewModel.showControls)
     }
 
-    func testPlayPause() throws {
+    @Test func playPause() async {
         let metadata = Metadata(title: "Test Book")
         let manifest = Manifest(metadata: metadata)
         let publication = Publication(manifest: manifest)
 
-        try viewModel.setup(navigator: XCTUnwrap(mockNavigator), publication: publication)
+        viewModel.setup(navigator: mockNavigator, publication: publication)
 
         viewModel.start()
 
-        let pred = NSPredicate { _, _ in self.viewModel.isPlaying }
-        wait(for: [XCTNSPredicateExpectation(predicate: pred, object: nil)], timeout: 2.0)
+        var attempts = 0
+        while !viewModel.isPlaying, attempts < 200 {
+            try? await Task.sleep(nanoseconds: 10_000_000)
+            attempts += 1
+        }
+        #expect(viewModel.isPlaying)
 
         viewModel.playPause()
 
-        let predPause = NSPredicate { _, _ in !self.viewModel.isPlaying }
-        wait(for: [XCTNSPredicateExpectation(predicate: predPause, object: nil)], timeout: 2.0)
+        attempts = 0
+        while viewModel.isPlaying, attempts < 200 {
+            try? await Task.sleep(nanoseconds: 10_000_000)
+            attempts += 1
+        }
+        #expect(!viewModel.isPlaying)
 
         viewModel.playPause()
 
-        let predResume = NSPredicate { _, _ in self.viewModel.isPlaying }
-        wait(for: [XCTNSPredicateExpectation(predicate: predResume, object: nil)], timeout: 2.0)
+        attempts = 0
+        while !viewModel.isPlaying, attempts < 200 {
+            try? await Task.sleep(nanoseconds: 10_000_000)
+            attempts += 1
+        }
+        #expect(viewModel.isPlaying)
     }
 
-    func testConfigurationUpdates() throws {
+    @Test func configurationUpdates() {
         let metadata = Metadata(title: "Config Book")
         let manifest = Manifest(metadata: metadata)
         let publication = Publication(manifest: manifest)
 
-        try viewModel.setup(navigator: XCTUnwrap(mockNavigator), publication: publication)
+        viewModel.setup(navigator: mockNavigator, publication: publication)
 
         // Initial State
-        XCTAssertNil(mockFactory.service.config.defaultLanguage)
+        #expect(mockFactory.service.config.defaultLanguage == nil)
 
         // Change Language
         let newLang = Language(code: .bcp47("fr"))
         viewModel.configLanguage = newLang
 
         // Verify service config updated
-        XCTAssertEqual(mockFactory.service.config.defaultLanguage, newLang)
+        #expect(mockFactory.service.config.defaultLanguage == newLang)
 
         // Change Voice
         let voice = TTSVoice(identifier: "com.test.voice", language: newLang, name: "Test Voice", gender: .female, quality: .high)
         viewModel.availableVoices = [voice]
         viewModel.configVoice = voice
 
-        XCTAssertEqual(mockFactory.service.config.voiceIdentifier, "com.test.voice")
+        #expect(mockFactory.service.config.voiceIdentifier == "com.test.voice")
     }
 }

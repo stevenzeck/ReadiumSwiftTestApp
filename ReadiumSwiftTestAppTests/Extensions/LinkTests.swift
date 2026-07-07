@@ -5,22 +5,24 @@
 //  Created by Steven Zeck on 2/6/26.
 //
 
+import Foundation
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
-final class LinkTests: XCTestCase {
-    func testOutlineChildren() {
+@Suite(.serialized) @MainActor
+struct LinkTests {
+    @Test func outlineChildren() {
         // Case 1: No children
         let linkNoChildren = Link(href: "chap1")
-        XCTAssertNil(linkNoChildren.outlineChildren)
+        #expect(linkNoChildren.outlineChildren == nil)
 
         // Case 2: With children
         let child = Link(href: "chap1-1")
         let linkWithChildren = Link(href: "chap1", children: [child])
 
-        XCTAssertNotNil(linkWithChildren.outlineChildren)
-        XCTAssertEqual(linkWithChildren.outlineChildren?.count, 1)
-        XCTAssertEqual(linkWithChildren.outlineChildren?.first?.href, "chap1-1")
+        #expect(linkWithChildren.outlineChildren != nil)
+        #expect(linkWithChildren.outlineChildren?.count == 1)
+        #expect(linkWithChildren.outlineChildren?.first?.href == "chap1-1")
     }
 }

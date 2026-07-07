@@ -5,9 +5,10 @@
 //  Created by Steven Zeck on 2/5/26.
 //
 
+import Foundation
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
 class MockSearchIterator: SearchIterator {
     var resultCount: Int?
@@ -46,27 +47,21 @@ class MockSearchService: AppSearchService {
     }
 }
 
-@MainActor
-final class SearchViewModelTests: XCTestCase {
-    var viewModel: SearchViewModel!
-    var mockService: MockSearchService!
+@Suite(.serialized) @MainActor
+struct SearchViewModelTests {
+    let viewModel: SearchViewModel
+    let mockService: MockSearchService
 
-    override func setUp() async throws {
-        try await super.setUp()
-        mockService = MockSearchService()
+    init() {
+        let mockService = MockSearchService()
+        self.mockService = mockService
         viewModel = SearchViewModel(searchService: mockService)
     }
 
-    override func tearDown() async throws {
-        viewModel = nil
-        mockService = nil
-        try await super.tearDown()
-    }
-
-    func testSearchSuccess() async throws {
+    @Test func searchSuccess() async throws {
         let iterator = MockSearchIterator()
         // Create a minimal valid locator
-        let locator = try Locator(href: XCTUnwrap(AnyURL(string: "href")), mediaType: .html, locations: .init(progression: 0))
+        let locator = try Locator(href: #require(AnyURL(string: "href")), mediaType: .html, locations: .init(progression: 0))
         let collection = LocatorCollection(locators: [locator])
         iterator.pages = [collection, nil]
 
@@ -76,34 +71,35 @@ final class SearchViewModelTests: XCTestCase {
         viewModel.search()
 
         // Wait for async task to complete
-        let pred = NSPredicate { _, _ in
-            !self.viewModel.isLoading && !self.viewModel.results.isEmpty
+        var attempts = 0
+        while viewModel.isLoading || viewModel.results.isEmpty, attempts < 200 {
+            try await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            attempts += 1
         }
-        let exp = XCTNSPredicateExpectation(predicate: pred, object: nil)
-        await fulfillment(of: [exp], timeout: 2.0)
 
-        XCTAssertEqual(viewModel.results.count, 1)
-        XCTAssertEqual(viewModel.results.first?.href.string, "href")
-        XCTAssertNil(viewModel.error)
+        #expect(viewModel.results.count == 1)
+        #expect(viewModel.results.first?.href.string == "href")
+        #expect(viewModel.error == nil)
     }
 
-    func testSearchFailure() async {
+    @Test func searchFailure() async throws {
         mockService.error = .badQuery(NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "Search failed"]))
         viewModel.query = "fail"
 
         viewModel.search()
 
-        let pred = NSPredicate { _, _ in
-            !self.viewModel.isLoading && self.viewModel.error != nil
+        // Wait for async task to complete
+        var attempts = 0
+        while viewModel.isLoading || viewModel.error == nil, attempts < 200 {
+            try await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            attempts += 1
         }
-        let exp = XCTNSPredicateExpectation(predicate: pred, object: nil)
-        await fulfillment(of: [exp], timeout: 2.0)
 
-        XCTAssertNotNil(viewModel.error)
-        XCTAssertTrue(viewModel.results.isEmpty)
+        #expect(viewModel.error != nil)
+        #expect(viewModel.results.isEmpty)
     }
 
-    func testCancelSearch() {
+    @Test func cancelSearch() {
         let iterator = MockSearchIterator()
         iterator.pages = Array(repeating: LocatorCollection(locators: []), count: 100)
         mockService.iterator = iterator
@@ -112,9 +108,9 @@ final class SearchViewModelTests: XCTestCase {
         viewModel.search()
 
         // Ensure the task has started and set isLoading to true
-        XCTAssertTrue(viewModel.isLoading)
+        #expect(viewModel.isLoading)
 
         viewModel.cancel()
-        XCTAssertFalse(viewModel.isLoading)
+        #expect(!viewModel.isLoading)
     }
 }

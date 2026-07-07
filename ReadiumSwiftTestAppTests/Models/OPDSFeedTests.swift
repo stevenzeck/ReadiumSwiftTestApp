@@ -5,28 +5,23 @@
 //  Created by Steven Zeck on 2/4/26.
 //
 
+import Foundation
 @testable import ReadiumSwiftTestApp
 import SwiftData
-import XCTest
+import Testing
 
-@MainActor
-final class OPDSFeedTests: XCTestCase {
-    var container: ModelContainer!
-    var context: ModelContext!
+@Suite(.serialized) @MainActor
+struct OPDSFeedTests {
+    let container: ModelContainer
+    let context: ModelContext
 
-    override func setUp() async throws {
-        try await super.setUp()
-        container = try TestHelper.makeInMemoryContainer()
+    init() throws {
+        let container = try TestHelper.makeInMemoryContainer()
+        self.container = container
         context = container.mainContext
     }
 
-    override func tearDown() async throws {
-        container = nil
-        context = nil
-        try await super.tearDown()
-    }
-
-    func testFeedInitialization() {
+    @Test func feedInitialization() {
         let id = UUID()
         let date = Date()
         let feed = OPDSFeed(
@@ -36,13 +31,13 @@ final class OPDSFeedTests: XCTestCase {
             addedDate: date
         )
 
-        XCTAssertEqual(feed.id, id)
-        XCTAssertEqual(feed.title, "Feed Project")
-        XCTAssertEqual(feed.url, "https://example.com/opds.json")
-        XCTAssertEqual(feed.addedDate, date)
+        #expect(feed.id == id)
+        #expect(feed.title == "Feed Project")
+        #expect(feed.url == "https://example.com/opds.json")
+        #expect(feed.addedDate == date)
     }
 
-    func testFeedPersistence() throws {
+    @Test func feedPersistence() throws {
         let feed = OPDSFeed(
             title: "Standard Ebooks",
             url: "https://standardebooks.org/opds"
@@ -54,7 +49,7 @@ final class OPDSFeedTests: XCTestCase {
         let descriptor = FetchDescriptor<OPDSFeed>(predicate: #Predicate { $0.title == "Standard Ebooks" })
         let fetchedFeeds = try context.fetch(descriptor)
 
-        XCTAssertEqual(fetchedFeeds.count, 1)
-        XCTAssertEqual(fetchedFeeds.first?.url, "https://standardebooks.org/opds")
+        #expect(fetchedFeeds.count == 1)
+        #expect(fetchedFeeds.first?.url == "https://standardebooks.org/opds")
     }
 }

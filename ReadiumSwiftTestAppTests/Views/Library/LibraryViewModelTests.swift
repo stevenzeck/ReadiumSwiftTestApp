@@ -5,9 +5,10 @@
 //  Created by Steven Zeck on 2/22/26.
 //
 
+import Foundation
 @testable import ReadiumSwiftTestApp
 import SwiftData
-import XCTest
+import Testing
 
 actor MockFileManager: FileManaging {
     let tempDir = URL(fileURLWithPath: "/tmp/mock-docs")
@@ -15,11 +16,7 @@ actor MockFileManager: FileManaging {
     var copyItemCalled = false
     var removeItemCalled = false
     var fileExistsResult = false
-    var removeItemExpectation: XCTestExpectation?
-
-    func setRemoveItemExpectation(_ expectation: XCTestExpectation) {
-        removeItemExpectation = expectation
-    }
+    var removeItemCount = 0
 
     func documentDirectoryURL() -> URL {
         return tempDir
@@ -31,7 +28,7 @@ actor MockFileManager: FileManaging {
 
     func removeItem(at _: URL) throws {
         removeItemCalled = true
-        removeItemExpectation?.fulfill()
+        removeItemCount += 1
     }
 
     func fileExists(atPath _: String) -> Bool {
@@ -39,52 +36,42 @@ actor MockFileManager: FileManaging {
     }
 }
 
-@MainActor
-final class LibraryViewModelTests: XCTestCase {
-    var viewModel: LibraryViewModel!
-    var mockFileManager: MockFileManager!
-    var container: ModelContainer!
-    var context: ModelContext!
+@Suite(.serialized) @MainActor
+final class LibraryViewModelTests {
+    var viewModel: LibraryViewModel
+    var mockFileManager: MockFileManager
+    var container: ModelContainer
+    var context: ModelContext
 
-    override func setUp() async throws {
-        try await super.setUp()
-        container = try TestHelper.makeInMemoryContainer()
+    init() throws {
+        let container = try TestHelper.makeInMemoryContainer()
+        self.container = container
         context = container.mainContext
-        mockFileManager = MockFileManager()
+        let mockFileManager = MockFileManager()
+        self.mockFileManager = mockFileManager
         viewModel = LibraryViewModel(fileManager: mockFileManager)
     }
 
-    override func tearDown() async throws {
-        container = nil
-        context = nil
-        mockFileManager = nil
-        viewModel = nil
-        try await super.tearDown()
-    }
-
-    /// 2. Make the test `async`
-    func testDeleteBook() async throws {
+    @Test func deleteBook() async throws {
         let book = Book(title: "Delete Me", format: "epub", filePath: "delete.epub", coverPath: "cover.jpg")
         context.insert(book)
         try context.save()
-
-        let expectation = XCTestExpectation(description: "File removal called")
-        expectation.expectedFulfillmentCount = 2
-
-        // 3. `await` interaction with the actor
-        await mockFileManager.setRemoveItemExpectation(expectation)
 
         viewModel.deleteBook(book, modelContext: context)
 
         // Verify DB deletion immediately
         let books = try context.fetch(FetchDescriptor<Book>())
-        XCTAssertTrue(books.isEmpty)
+        #expect(books.isEmpty)
 
-        // Verify file deletion async using the modern concurrency await wrapper
-        await fulfillment(of: [expectation], timeout: 2.0)
+        // Verify file deletion async
+        var attempts = 0
+        while await mockFileManager.removeItemCount < 2, attempts < 200 {
+            try await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            attempts += 1
+        }
 
-        // 4. `await` state checks on the actor
+        // State checks on the actor
         let removed = await mockFileManager.removeItemCalled
-        XCTAssertTrue(removed)
+        #expect(removed)
     }
 }

@@ -5,11 +5,12 @@
 //  Created by Steven Zeck on 2/4/26.
 //
 
+import Foundation
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
-@MainActor
-final class DownloadServiceTests: XCTestCase {
+@Suite(.serialized) @MainActor
+final class DownloadServiceTests {
     // MARK: - Local Mock Protocol
 
     /// Unique class here to avoid colliding with DownloadCoverTests' MockURLProtocol
@@ -49,7 +50,7 @@ final class DownloadServiceTests: XCTestCase {
         override func stopLoading() {}
     }
 
-    override func tearDown() {
+    deinit {
         ServiceMockURLProtocol.requestHandler = nil
     }
 
@@ -63,11 +64,11 @@ final class DownloadServiceTests: XCTestCase {
         return (service, manager)
     }
 
-    func testStartDownload() async throws {
+    @Test func startDownload() async throws {
         let (downloadService, _) = makeSUT()
 
         let id = UUID()
-        let url = try XCTUnwrap(URL(string: "https://example.com/book.epub"))
+        let url = try #require(URL(string: "https://example.com/book.epub"))
 
         // Setup Mock
         ServiceMockURLProtocol.requestHandler = { request in
@@ -80,20 +81,17 @@ final class DownloadServiceTests: XCTestCase {
         try? await Task.sleep(nanoseconds: 100_000_000)
 
         // Only check that the download was tracked.
-        guard let download = downloadService.activeDownloads[id] else {
-            XCTFail("Download should be tracked in activeDownloads")
-            return
-        }
+        let download = try #require(downloadService.activeDownloads[id], "Download should be tracked in activeDownloads")
 
-        XCTAssertEqual(download.id, id)
-        XCTAssertEqual(download.url, url)
+        #expect(download.id == id)
+        #expect(download.url == url)
     }
 
-    func testDownloadProgressDelegate() async throws {
+    @Test func downloadProgressDelegate() async throws {
         let (downloadService, _) = makeSUT()
 
         let id = UUID()
-        let url = try XCTUnwrap(URL(string: "https://example.com/test.epub"))
+        let url = try #require(URL(string: "https://example.com/test.epub"))
 
         // Setup Mock with Content-Length so progress can be calculated
         ServiceMockURLProtocol.requestHandler = { request in
@@ -107,8 +105,6 @@ final class DownloadServiceTests: XCTestCase {
             return (response, data, nil)
         }
 
-        let progressExp = expectation(description: "Progress > 0 received")
-
         // 1. Get the stream (Await access to the actor)
         let stream = await downloadService.downloadEvents
 
@@ -119,10 +115,10 @@ final class DownloadServiceTests: XCTestCase {
                    eventId == id,
                    progress > 0
                 {
-                    progressExp.fulfill()
-                    return
+                    return true
                 }
             }
+            return false
         }
 
         // Wait briefly to ensure subscription is active
@@ -131,22 +127,20 @@ final class DownloadServiceTests: XCTestCase {
         // 3. Start Download
         downloadService.startDownload(url: url, for: id)
 
-        await fulfillment(of: [progressExp], timeout: 2.0)
-        listenerTask.cancel()
+        let receivedProgress = await listenerTask.value
+        #expect(receivedProgress)
     }
 
-    func testDownloadCompletionDelegate() async throws {
+    @Test func downloadCompletionDelegate() async throws {
         let (downloadService, _) = makeSUT()
 
         let id = UUID()
-        let url = try XCTUnwrap(URL(string: "https://example.com/complete.epub"))
+        let url = try #require(URL(string: "https://example.com/complete.epub"))
 
         ServiceMockURLProtocol.requestHandler = { request in
             let data = "Dummy Content".data(using: .utf8)!
             return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, data, nil)
         }
-
-        let eventExp = expectation(description: "Download finished received")
 
         // 1. Get the stream
         let stream = await downloadService.downloadEvents
@@ -157,18 +151,17 @@ final class DownloadServiceTests: XCTestCase {
                 if case let .didFinish(eventId, location) = event,
                    eventId == id
                 {
-                    XCTAssertTrue(FileManager.default.fileExists(atPath: location.path))
-                    eventExp.fulfill()
-                    return
+                    return FileManager.default.fileExists(atPath: location.path)
                 }
             }
+            return false
         }
 
         try await Task.sleep(nanoseconds: 100_000_000)
 
         downloadService.startDownload(url: url, for: id)
 
-        await fulfillment(of: [eventExp], timeout: 2.0)
-        listenerTask.cancel()
+        let finished = await listenerTask.value
+        #expect(finished)
     }
 }

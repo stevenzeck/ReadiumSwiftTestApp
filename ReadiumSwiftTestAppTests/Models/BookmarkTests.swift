@@ -5,29 +5,24 @@
 //  Created by Steven Zeck on 2/5/26.
 //
 
+import Foundation
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import SwiftData
-import XCTest
+import Testing
 
-@MainActor
-final class BookmarkTests: XCTestCase {
-    var container: ModelContainer!
-    var context: ModelContext!
+@Suite(.serialized) @MainActor
+struct BookmarkTests {
+    let container: ModelContainer
+    let context: ModelContext
 
-    override func setUp() async throws {
-        try await super.setUp()
-        container = try TestHelper.makeInMemoryContainer()
+    init() throws {
+        let container = try TestHelper.makeInMemoryContainer()
+        self.container = container
         context = container.mainContext
     }
 
-    override func tearDown() async throws {
-        container = nil
-        context = nil
-        try await super.tearDown()
-    }
-
-    func testBookmarkInitialization() {
+    @Test func bookmarkInitialization() throws {
         let book = Book(title: "Test Book", format: "epub", filePath: "test.epub")
         context.insert(book)
 
@@ -42,25 +37,22 @@ final class BookmarkTests: XCTestCase {
         }
         """
 
-        guard let locator = try? Locator(jsonString: json) else {
-            XCTFail("Failed to create Locator from JSON")
-            return
-        }
+        let locator = try #require(try? Locator(jsonString: json), "Failed to create Locator from JSON")
 
         let bookmarkID = UUID()
         let bookmark = Bookmark(id: bookmarkID, book: book, locator: locator)
 
-        XCTAssertEqual(bookmark.id, bookmarkID)
-        XCTAssertEqual(bookmark.book, book)
-        XCTAssertNotNil(bookmark.locator)
-        XCTAssertEqual(bookmark.locator?.href.string, "/chapter1.html")
-        XCTAssertEqual(bookmark.locator?.locations.progression, 0.5)
+        #expect(bookmark.id == bookmarkID)
+        #expect(bookmark.book == book)
+        #expect(bookmark.locator != nil)
+        #expect(bookmark.locator?.href.string == "/chapter1.html")
+        #expect(bookmark.locator?.locations.progression == 0.5)
 
         // Verify JSON string persistence
-        XCTAssertTrue(bookmark.locatorJSON.contains("/chapter1.html"))
+        #expect(bookmark.locatorJSON.contains("/chapter1.html"))
     }
 
-    func testBookmarkPersistence() throws {
+    @Test func bookmarkPersistence() throws {
         let book = Book(title: "Persisted Book", format: "epub", filePath: "persist.epub")
         context.insert(book)
 
@@ -70,10 +62,7 @@ final class BookmarkTests: XCTestCase {
             "type": "text/html"
         }
         """
-        guard let locator = try? Locator(jsonString: json) else {
-            XCTFail("Could not create locator")
-            return
-        }
+        let locator = try #require(try? Locator(jsonString: json), "Could not create locator")
 
         let bookmark = Bookmark(book: book, locator: locator)
 
@@ -83,18 +72,18 @@ final class BookmarkTests: XCTestCase {
         let descriptor = FetchDescriptor<Bookmark>()
         let fetchedBookmarks = try context.fetch(descriptor)
 
-        XCTAssertEqual(fetchedBookmarks.count, 1)
-        XCTAssertEqual(fetchedBookmarks.first?.book?.title, "Persisted Book")
-        XCTAssertEqual(fetchedBookmarks.first?.locator?.href.string, "/chapter2.html")
+        #expect(fetchedBookmarks.count == 1)
+        #expect(fetchedBookmarks.first?.book?.title == "Persisted Book")
+        #expect(fetchedBookmarks.first?.locator?.href.string == "/chapter2.html")
     }
 
-    func testBookmarkWithInvalidJSON() throws {
+    @Test func bookmarkWithInvalidJSON() throws {
         let book = Book(title: "Corrupt Book", format: "epub", filePath: "corrupt.epub")
         context.insert(book)
 
         // Simulating a case where the JSON stored in the database is malformed
         let bookmarkID = UUID()
-        let bookmark = try Bookmark(id: bookmarkID, book: book, locator: Locator(href: XCTUnwrap(AnyURL(string: "dummy")), mediaType: .html))
+        let bookmark = try Bookmark(id: bookmarkID, book: book, locator: Locator(href: #require(AnyURL(string: "dummy")), mediaType: .html))
 
         // Manually corrupt the JSON string
         bookmark.locatorJSON = "{ \"invalid\": json_structure "
@@ -104,11 +93,11 @@ final class BookmarkTests: XCTestCase {
 
         // Fetch and verify it doesn't crash accessing the computed property
         let fetchedBookmark = try? context.fetch(FetchDescriptor<Bookmark>()).first
-        XCTAssertNotNil(fetchedBookmark)
-        XCTAssertNil(fetchedBookmark?.locator, "Locator should be nil when JSON is invalid")
+        #expect(fetchedBookmark != nil)
+        #expect(fetchedBookmark?.locator == nil)
     }
 
-    func testDeleteBookDeletesBookmark() throws {
+    @Test func deleteBookDeletesBookmark() throws {
         let book = Book(title: "Delete Me", format: "epub", filePath: "delete.epub")
         context.insert(book)
 
@@ -118,7 +107,7 @@ final class BookmarkTests: XCTestCase {
             "type": "text/html"
         }
         """
-        guard let locator = try? Locator(jsonString: json) else { return }
+        let locator = try #require(try? Locator(jsonString: json))
 
         let bookmark = Bookmark(book: book, locator: locator)
         context.insert(bookmark)
@@ -126,7 +115,7 @@ final class BookmarkTests: XCTestCase {
 
         // Verify existence
         var bookmarks = try context.fetch(FetchDescriptor<Bookmark>())
-        XCTAssertEqual(bookmarks.count, 1)
+        #expect(bookmarks.count == 1)
 
         // Delete book
         context.delete(book)
@@ -134,6 +123,6 @@ final class BookmarkTests: XCTestCase {
 
         // Verify cascade delete
         bookmarks = try context.fetch(FetchDescriptor<Bookmark>())
-        XCTAssertTrue(bookmarks.isEmpty, "Bookmark should be deleted when Book is deleted")
+        #expect(bookmarks.isEmpty)
     }
 }

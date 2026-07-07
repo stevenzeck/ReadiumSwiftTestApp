@@ -9,7 +9,7 @@ import Foundation
 import ReadiumOPDS
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
-import XCTest
+import Testing
 
 /// Independent MockURLProtocol for this test file
 class OPDSMockURLProtocol: Foundation.URLProtocol {
@@ -22,7 +22,7 @@ class OPDSMockURLProtocol: Foundation.URLProtocol {
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
+        return request
     }
 
     override func startLoading() {
@@ -49,21 +49,19 @@ class OPDSMockURLProtocol: Foundation.URLProtocol {
     override func stopLoading() {}
 }
 
-@MainActor
-final class OPDSParsingServiceTests: XCTestCase {
-    override func setUp() {
-        super.setUp()
+@Suite(.serialized) @MainActor
+final class OPDSParsingServiceTests {
+    init() {
         URLProtocol.registerClass(OPDSMockURLProtocol.self)
     }
 
-    override func tearDown() {
+    deinit {
         URLProtocol.unregisterClass(OPDSMockURLProtocol.self)
         OPDSMockURLProtocol.mockData = nil
         OPDSMockURLProtocol.mockError = nil
-        super.tearDown()
     }
 
-    func testParseValidOPDS2Feed() async throws {
+    @Test func parseValidOPDS2Feed() async throws {
         let jsonString = """
         {
             "metadata": { "title": "Mock Feed" },
@@ -85,20 +83,17 @@ final class OPDSParsingServiceTests: XCTestCase {
 
         let service = ReadiumOPDSParsingService(client: client)
 
-        guard let url = URL(string: "https://example.com/opds.json") else {
-            XCTFail("Invalid URL")
-            return
-        }
+        let url = try #require(URL(string: "https://example.com/opds.json"), "Invalid URL")
 
         let feed = try await service.parseURL(url: url)
 
-        XCTAssertNotNil(feed)
-        XCTAssertEqual(feed?.metadata.title, "Mock Feed")
-        XCTAssertEqual(feed?.publications.count, 1)
-        XCTAssertEqual(feed?.publications.first?.metadata.title, "Book 1")
+        #expect(feed != nil)
+        #expect(feed?.metadata.title == "Mock Feed")
+        #expect(feed?.publications.count == 1)
+        #expect(feed?.publications.first?.metadata.title == "Book 1")
     }
 
-    func testParseFailure() async {
+    @Test func parseFailure() async throws {
         OPDSMockURLProtocol.mockError = NSError(domain: "test", code: -1, userInfo: nil)
 
         let config = URLSessionConfiguration.ephemeral
@@ -107,13 +102,10 @@ final class OPDSParsingServiceTests: XCTestCase {
 
         let service = ReadiumOPDSParsingService(client: client)
 
-        guard let url = URL(string: "https://example.com/fail.json") else { return }
+        let url = try #require(URL(string: "https://example.com/fail.json"))
 
-        do {
+        await #expect(throws: Error.self) {
             _ = try await service.parseURL(url: url)
-            XCTFail("Should verify error")
-        } catch {
-            XCTAssertNotNil(error)
         }
     }
 }

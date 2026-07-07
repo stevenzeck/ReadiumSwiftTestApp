@@ -5,29 +5,24 @@
 //  Created by Steven Zeck on 2/4/26.
 //
 
+import Foundation
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import SwiftData
-import XCTest
+import Testing
 
-@MainActor
-final class BookTests: XCTestCase {
-    var container: ModelContainer!
-    var context: ModelContext!
+@Suite(.serialized) @MainActor
+struct BookTests {
+    let container: ModelContainer
+    let context: ModelContext
 
-    override func setUp() async throws {
-        try await super.setUp()
-        container = try TestHelper.makeInMemoryContainer()
+    init() throws {
+        let container = try TestHelper.makeInMemoryContainer()
+        self.container = container
         context = container.mainContext
     }
 
-    override func tearDown() async throws {
-        container = nil
-        context = nil
-        try await super.tearDown()
-    }
-
-    func testBookInitialization() {
+    @Test func bookInitialization() {
         let id = UUID()
         let date = Date()
         let book = Book(
@@ -40,18 +35,18 @@ final class BookTests: XCTestCase {
             createdDate: date
         )
 
-        XCTAssertEqual(book.id, id)
-        XCTAssertEqual(book.title, "Test Book")
-        XCTAssertEqual(book.author, "Test Author")
-        XCTAssertEqual(book.format, "epub")
-        XCTAssertEqual(book.filePath, "test.epub")
-        XCTAssertEqual(book.coverPath, "cover.jpg")
-        XCTAssertEqual(book.createdDate, date)
-        XCTAssertTrue(book.bookmarks.isEmpty)
-        XCTAssertTrue(book.highlights.isEmpty)
+        #expect(book.id == id)
+        #expect(book.title == "Test Book")
+        #expect(book.author == "Test Author")
+        #expect(book.format == "epub")
+        #expect(book.filePath == "test.epub")
+        #expect(book.coverPath == "cover.jpg")
+        #expect(book.createdDate == date)
+        #expect(book.bookmarks.isEmpty)
+        #expect(book.highlights.isEmpty)
     }
 
-    func testBookPersistence() throws {
+    @Test func bookPersistence() throws {
         let book = Book(
             title: "Persistent Book",
             format: "pdf",
@@ -64,11 +59,11 @@ final class BookTests: XCTestCase {
         let descriptor = FetchDescriptor<Book>(predicate: #Predicate { $0.title == "Persistent Book" })
         let fetchedBooks = try context.fetch(descriptor)
 
-        XCTAssertEqual(fetchedBooks.count, 1)
-        XCTAssertEqual(fetchedBooks.first?.title, "Persistent Book")
+        #expect(fetchedBooks.count == 1)
+        #expect(fetchedBooks.first?.title == "Persistent Book")
     }
 
-    func testBookDeletion() throws {
+    @Test func bookDeletion() throws {
         let book = Book(
             title: "Book to Delete",
             format: "epub",
@@ -83,17 +78,17 @@ final class BookTests: XCTestCase {
         let descriptor = FetchDescriptor<Book>(predicate: #Predicate { $0.title == "Book to Delete" })
         let fetchedBooks = try context.fetch(descriptor)
 
-        XCTAssertTrue(fetchedBooks.isEmpty)
+        #expect(fetchedBooks.isEmpty)
     }
 
-    func testBookRelationshipCascades() throws {
+    @Test func bookRelationshipCascades() throws {
         // Verify that deleting a book properly deletes associated Highlights and Bookmarks
         // This reinforces the relationship deletion rules defined in the models.
 
         let book = Book(title: "Parent Book", format: "epub", filePath: "p.epub")
         context.insert(book)
 
-        let locator = try Locator(href: XCTUnwrap(AnyURL(string: "chap1")), mediaType: .html)
+        let locator = try Locator(href: #require(AnyURL(string: "chap1")), mediaType: .html)
         let bookmark = Bookmark(book: book, locator: locator)
         let highlight = Highlight(book: book, locator: locator)
 
@@ -102,14 +97,14 @@ final class BookTests: XCTestCase {
 
         try context.save()
 
-        XCTAssertEqual(try context.fetch(FetchDescriptor<Bookmark>()).count, 1)
-        XCTAssertEqual(try context.fetch(FetchDescriptor<Highlight>()).count, 1)
+        #expect(try context.fetch(FetchDescriptor<Bookmark>()).count == 1)
+        #expect(try context.fetch(FetchDescriptor<Highlight>()).count == 1)
 
         // Delete Parent
         context.delete(book)
         try context.save()
 
-        XCTAssertEqual(try context.fetch(FetchDescriptor<Bookmark>()).count, 0)
-        XCTAssertEqual(try context.fetch(FetchDescriptor<Highlight>()).count, 0)
+        #expect(try context.fetch(FetchDescriptor<Bookmark>()).count == 0)
+        #expect(try context.fetch(FetchDescriptor<Highlight>()).count == 0)
     }
 }
