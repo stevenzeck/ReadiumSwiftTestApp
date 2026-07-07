@@ -89,20 +89,19 @@ class MockNavigator: Navigator, DecorableNavigator {
 
     var readingProgression: ReadiumShared.ReadingProgression = .ltr
 
-    func go(to _: Locator, animated _: Bool, completion: @escaping () -> Void) -> Bool {
-        completion()
+    func go(to locator: Locator, options: NavigatorGoOptions) async -> Bool {
         return true
     }
 
-    func go(to _: Locator, animated _: Bool) async -> Bool {
+    func go(to link: Link, options: NavigatorGoOptions) async -> Bool {
         return true
     }
 
-    func go(to _: Link, animated _: Bool, completion _: @escaping () -> Void) -> Bool {
+    func goForward(options: NavigatorGoOptions) async -> Bool {
         return true
     }
 
-    func go(to _: Link, animated _: Bool) async -> Bool {
+    func goBackward(options: NavigatorGoOptions) async -> Bool {
         return true
     }
 }
