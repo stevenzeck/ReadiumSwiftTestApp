@@ -13,7 +13,12 @@ import Testing
 
 @Suite(.serialized) @MainActor
 final class OPDSParsingServiceTests {
+    init() {
+        URLProtocol.registerClass(MockURLProtocol.self)
+    }
+
     deinit {
+        URLProtocol.unregisterClass(MockURLProtocol.self)
         MockURLProtocol.requestHandler = nil
     }
 
