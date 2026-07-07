@@ -75,7 +75,7 @@ struct SearchView: View {
                                 .id(locatorDTO)
                                 .onTapGesture {
                                     viewModel.lastSelectedLocator = locatorDTO
-                                    onResultSelected(locatorDTO.toReadiumLocator)
+                                    onResultSelected(locatorDTO)
                                     dismiss()
                                 }
                             }
@@ -104,7 +104,7 @@ struct SearchView: View {
     // MARK: - Helpers
 
     /// Creates an AttributedString with the 'highlight' portion styled.
-    func highlightedText(from text: TextDTO) -> AttributedString {
+    func highlightedText(from text: Locator.Text) -> AttributedString {
         var attributed = AttributedString("")
 
         if let before = text.before {

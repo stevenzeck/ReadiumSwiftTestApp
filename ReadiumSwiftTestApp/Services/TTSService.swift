@@ -14,7 +14,7 @@ import Foundation
 /// We use `SendableLocator` (DTO) to ensure strict concurrency safety.
 struct AppTTSUtterance: Equatable {
     let text: String
-    let locator: SendableLocator
+    let locator: Locator
 }
 
 protocol TTSServiceDelegate: AnyObject {
@@ -89,18 +89,15 @@ class PublicationTTSService: TTSService, PublicationSpeechSynthesizerDelegate {
         case .stopped:
             appState = .stopped
         case let .paused(utterance):
-            let locatorDTO = SendableLocator(locator: utterance.locator)
-            appState = .paused(AppTTSUtterance(text: utterance.text, locator: locatorDTO))
+            appState = .paused(AppTTSUtterance(text: utterance.text, locator: utterance.locator))
         case let .playing(utterance, _):
-            let locatorDTO = SendableLocator(locator: utterance.locator)
-            appState = .playing(AppTTSUtterance(text: utterance.text, locator: locatorDTO), nil)
+            appState = .playing(AppTTSUtterance(text: utterance.text, locator: utterance.locator), nil)
         }
         delegate?.ttsService(self, stateDidChange: appState)
     }
 
     func publicationSpeechSynthesizer(_: PublicationSpeechSynthesizer, utterance: PublicationSpeechSynthesizer.Utterance, didFailWithError error: PublicationSpeechSynthesizer.Error) {
-        let locatorDTO = SendableLocator(locator: utterance.locator)
-        delegate?.ttsService(self, utterance: AppTTSUtterance(text: utterance.text, locator: locatorDTO), didFailWithError: error)
+        delegate?.ttsService(self, utterance: AppTTSUtterance(text: utterance.text, locator: utterance.locator), didFailWithError: error)
     }
 }
 

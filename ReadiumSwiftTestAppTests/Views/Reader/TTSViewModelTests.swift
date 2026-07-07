@@ -27,14 +27,14 @@ class MockTTSService: TTSService {
         isPlaying = true
 
         let safeLocator = locator ?? Locator(href: AnyURL(string: "chap1")!, mediaType: MediaType.html)
-        let utterance = AppTTSUtterance(text: "Test", locator: SendableLocator(locator: safeLocator))
+        let utterance = AppTTSUtterance(text: "Test", locator: safeLocator)
         delegate?.ttsService(self, stateDidChange: .playing(utterance, nil))
     }
 
     func pauseOrResume() {
         isPlaying.toggle()
         let locator = Locator(href: AnyURL(string: "chap1")!, mediaType: MediaType.html)
-        let utterance = AppTTSUtterance(text: "Test", locator: SendableLocator(locator: locator))
+        let utterance = AppTTSUtterance(text: "Test", locator: locator)
 
         if isPlaying {
             delegate?.ttsService(self, stateDidChange: .playing(utterance, nil))
