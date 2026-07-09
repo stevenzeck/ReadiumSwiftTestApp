@@ -11,13 +11,12 @@ import SwiftData
 import SwiftUI
 
 struct AudiobookView: View {
-    @State private var viewModel: AudiobookViewModel
+    @Environment(AudioPlaybackManager.self) var viewModel
     @Environment(\.modelContext) private var modelContext
     @State private var showingPreferences = false
 
-    init(publication: Publication, book: Book) {
-        _viewModel = State(initialValue: AudiobookViewModel(publication: publication, book: book))
-    }
+    let publication: Publication
+    let book: Book
 
     var body: some View {
         VStack(spacing: 30) {
@@ -65,7 +64,8 @@ struct AudiobookView: View {
 
             // Slider
             VStack(spacing: 4) {
-                Slider(value: $viewModel.seekProgress, in: 0 ... 1, onEditingChanged: { editing in
+                @Bindable var bViewModel = viewModel
+                Slider(value: $bViewModel.seekProgress, in: 0 ... 1, onEditingChanged: { editing in
                     viewModel.isSeeking = editing
                     if !editing {
                         viewModel.seekSliderChanged(progress: viewModel.seekProgress)
@@ -91,6 +91,8 @@ struct AudiobookView: View {
                     Image(systemName: "backward.end.fill")
                         .font(.title2)
                 }
+                .disabled(!viewModel.canGoBackward)
+                .opacity(viewModel.canGoBackward ? 1.0 : 0.3)
 
                 Button(action: {
                     viewModel.seekBackward()
@@ -119,6 +121,8 @@ struct AudiobookView: View {
                     Image(systemName: "forward.end.fill")
                         .font(.title2)
                 }
+                .disabled(!viewModel.canGoForward)
+                .opacity(viewModel.canGoForward ? 1.0 : 0.3)
             }
             .foregroundColor(.primary)
 
@@ -137,11 +141,7 @@ struct AudiobookView: View {
             AudiobookPreferencesView(viewModel: viewModel)
         }
         .onAppear {
-            viewModel.modelContext = modelContext
-            viewModel.navigator.play()
-        }
-        .onDisappear {
-            viewModel.navigator.pause()
+            viewModel.load(publication: publication, book: book, modelContext: modelContext)
         }
     }
 

@@ -19,6 +19,7 @@ struct ReaderLoaderView: View {
 
     @Environment(ReadiumService.self) var readium
     @Environment(\.modelContext) private var modelContext
+    @Environment(AudioPlaybackManager.self) var playbackManager
 
     // MARK: - ViewModel
 
@@ -141,6 +142,12 @@ struct ReaderLoaderView: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            playbackManager.isReaderVisible = true
+        }
+        .onDisappear {
+            playbackManager.isReaderVisible = false
         }
         .sheet(isPresented: $showingTOC) {
             TOCView(

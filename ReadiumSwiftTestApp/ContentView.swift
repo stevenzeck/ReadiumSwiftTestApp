@@ -34,6 +34,10 @@ struct ContentView: View {
                     Label("OPDS", systemImage: "globe")
                 }
         }
+        .overlay(alignment: .bottom) {
+            AudiobookMiniPlayer()
+                .padding(.bottom, 49)
+        }
         .task {
             // Consume the stream for database side-effects
             for await event in await downloadService.downloadEvents {

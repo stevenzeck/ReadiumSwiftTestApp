@@ -17,6 +17,7 @@ struct ReadiumSwiftTestApp: App {
 
     @State private var readium = ReadiumService()
     @State private var downloadService = DownloadService()
+    @State private var audioPlaybackManager = AudioPlaybackManager()
 
     // MARK: - Body
 
@@ -25,6 +26,7 @@ struct ReadiumSwiftTestApp: App {
             ContentView()
                 .environment(readium)
                 .environment(downloadService)
+                .environment(audioPlaybackManager)
                 .onAppear {
                     downloadService.setupBackgroundHandler(appDelegate: appDelegate)
                 }

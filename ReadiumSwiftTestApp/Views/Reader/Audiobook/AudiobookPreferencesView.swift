@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AudiobookPreferencesView: View {
-    @Bindable var viewModel: AudiobookViewModel
+    @Bindable var viewModel: AudioPlaybackManager
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
