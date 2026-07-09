@@ -148,9 +148,11 @@ struct ReaderLoaderView: View {
                 book: book,
                 onSelect: { link in
                     self.targetLocator = Locator(href: link.url(), mediaType: link.mediaType ?? MediaType.html, title: link.title)
+                    epubNavigator?.apply(decorations: [], in: "search")
                 },
                 onSelectLocator: { locator in
                     self.targetLocator = locator
+                    epubNavigator?.apply(decorations: [], in: "search")
                 }
             )
         }
@@ -170,6 +172,16 @@ struct ReaderLoaderView: View {
             if let vm = viewModel.searchViewModel {
                 SearchView(viewModel: vm) { locator in
                     self.targetLocator = locator
+                    if let navigator = epubNavigator {
+                        let decorations = vm.results.enumerated().map { index, loc in
+                            Decoration(
+                                id: "searchResult-\(index)",
+                                locator: loc,
+                                style: .highlight(tint: .yellow, isActive: loc == locator)
+                            )
+                        }
+                        navigator.apply(decorations: decorations, in: "search")
+                    }
                 }
             }
         }
