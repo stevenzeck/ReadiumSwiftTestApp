@@ -5,6 +5,8 @@
 //  Created by Steven Zeck on 2/7/26.
 //
 
+import AppIntents
+import CoreSpotlight
 import Foundation
 import Observation
 @preconcurrency import ReadiumShared
@@ -83,14 +85,23 @@ class LibraryViewModel {
     func deleteBook(_ book: Book, modelContext: ModelContext) {
         let filePath = book.filePath
         let coverPath = book.coverPath
+        let bookId = book.id
+        let isAudiobook = book.format.lowercased().contains("audio") || book.format.lowercased().contains("zab")
 
         // Remove from database
         modelContext.delete(book)
+        try? modelContext.save()
 
         // Perform file cleanup in background
         let fileManager = self.fileManager
 
         Task.detached(priority: .utility) {
+            if isAudiobook {
+                try? await CSSearchableIndex.default().deleteAppEntities(identifiedBy: [bookId], ofType: AudiobookEntity.self)
+            } else {
+                try? await CSSearchableIndex.default().deleteAppEntities(identifiedBy: [bookId], ofType: EbookEntity.self)
+            }
+
             let documents = await fileManager.documentDirectoryURL()
             let fileURL = documents.appendingPathComponent(filePath)
 
@@ -153,6 +164,15 @@ class LibraryViewModel {
             }
 
             modelContext.insert(newBook)
+            try? modelContext.save()
+
+            Task {
+                if newBook.format.lowercased().contains("audio") || newBook.format.lowercased().contains("zab") {
+                    try? await CSSearchableIndex.default().indexAppEntities([AudiobookEntity(from: newBook)])
+                } else {
+                    try? await CSSearchableIndex.default().indexAppEntities([EbookEntity(from: newBook)])
+                }
+            }
 
         } catch {
             throw .fileSystem(error.localizedDescription)

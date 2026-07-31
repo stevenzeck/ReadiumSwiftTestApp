@@ -21,6 +21,8 @@ struct LibraryView: View {
     /// Fetches all Book entities, sorted by creation date (newest first).
     @Query(sort: \Book.createdDate, order: .reverse) private var books: [Book]
 
+    @State private var navigationPath: [LibraryRoute] = []
+
     /// The ViewModel handling business logic for file imports and deletions.
     @State private var viewModel = LibraryViewModel()
 
@@ -38,7 +40,7 @@ struct LibraryView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
                 if books.isEmpty {
                     ContentUnavailableView(
@@ -132,6 +134,13 @@ struct LibraryView: View {
                 Button("Cancel", role: .cancel) { viewModel.bookToDelete = nil }
             } message: {
                 Text("Are you sure you want to delete '\(viewModel.bookToDelete?.title ?? "this book")'? This cannot be undone.")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openBookIntentRun)) { notification in
+                guard let bookId = notification.object as? UUID else { return }
+                let descriptor = FetchDescriptor<Book>(predicate: #Predicate { $0.id == bookId })
+                if let book = try? modelContext.fetch(descriptor).first {
+                    navigationPath.append(.reader(book))
+                }
             }
         }
     }

@@ -17,12 +17,14 @@ struct OPDSFeedListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var feeds: [OPDSFeed]
 
+    @State private var navigationPath: [OPDSRoute] = []
+
     @State private var viewModel = OPDSFeedListViewModel()
 
     // MARK: - Body
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
                 if feeds.isEmpty {
                     ContentUnavailableView(
@@ -100,6 +102,13 @@ struct OPDSFeedListView: View {
                     Text("Are you sure you want to delete '\(viewModel.feedsToDelete.first?.title ?? "this feed")'?")
                 } else {
                     Text("Are you sure you want to delete these \(viewModel.feedsToDelete.count) feeds?")
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openFeedIntentRun)) { notification in
+                guard let feedId = notification.object as? UUID else { return }
+                let descriptor = FetchDescriptor<OPDSFeed>(predicate: #Predicate { $0.id == feedId })
+                if let feed = try? modelContext.fetch(descriptor).first, let url = URL(string: feed.url) {
+                    navigationPath.append(.feedBrowser(url: url, title: feed.title))
                 }
             }
         }

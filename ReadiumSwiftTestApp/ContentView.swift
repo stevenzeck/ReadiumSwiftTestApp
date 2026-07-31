@@ -5,6 +5,8 @@
 //  Created by Steven Zeck on 12/30/25.
 //
 
+import AppIntents
+import CoreSpotlight
 import SwiftData
 import SwiftUI
 
@@ -17,22 +19,25 @@ struct ContentView: View {
 
     @State private var errorMessage: String?
     @State private var showingError: Bool = false
+    @State private var selectedTab: Int = 0
 
     // MARK: - Body
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             // Tab 1: Local Library
             LibraryView()
                 .tabItem {
                     Label("Library", systemImage: "books.vertical")
                 }
+                .tag(0)
 
             // Tab 2: OPDS Catalog Browser
             OPDSFeedListView()
                 .tabItem {
                     Label("OPDS", systemImage: "globe")
                 }
+                .tag(1)
         }
         .overlay(alignment: .bottom) {
             AudiobookMiniPlayer()
@@ -49,6 +54,12 @@ struct ContentView: View {
         }, message: {
             Text(errorMessage ?? "An unknown error occurred.")
         })
+        .onReceive(NotificationCenter.default.publisher(for: .openBookIntentRun)) { _ in
+            selectedTab = 0
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openFeedIntentRun)) { _ in
+            selectedTab = 1
+        }
     }
 
     // MARK: - Private Methods
@@ -61,6 +72,14 @@ struct ContentView: View {
                 book.filePath = location.lastPathComponent
                 book.isDownloaded = true
                 try? modelContext.save()
+
+                Task {
+                    if book.format.lowercased().contains("audio") || book.format.lowercased().contains("zab") {
+                        try? await CSSearchableIndex.default().indexAppEntities([AudiobookEntity(from: book)])
+                    } else {
+                        try? await CSSearchableIndex.default().indexAppEntities([EbookEntity(from: book)])
+                    }
+                }
             }
 
         case let .didFail(id, error):

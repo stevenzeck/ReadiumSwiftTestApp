@@ -11,5 +11,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSSiriUsageDescription</key>
+	<string>Siri uses this to help you open books and manage your library.</string>
 </dict>
 </plist>

@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@" : {
+
+    },
     "Add" : {
 
     },
@@ -38,6 +41,15 @@
 
     },
     "Audio Preferences" : {
+
+    },
+    "Audiobook" : {
+
+    },
+    "Author" : {
+
+    },
+    "Book" : {
 
     },
     "Bookmark Saved" : {
@@ -122,7 +134,13 @@
     "Error: %@" : {
 
     },
+    "Feed" : {
+
+    },
     "Font Size: %lld%%" : {
+
+    },
+    "Format" : {
 
     },
     "Highlight" : {
@@ -176,22 +194,49 @@
     "OPDS" : {
 
     },
+    "OPDS Feed" : {
+
+    },
     "OPDS Feeds" : {
+
+    },
+    "Open Book" : {
+
+    },
+    "Open Feed" : {
+
+    },
+    "Open OPDS Feed" : {
 
     },
     "Opening..." : {
 
     },
+    "Opens a book in the library." : {
+
+    },
+    "Opens an OPDS feed." : {
+
+    },
     "Optionally add a note to this highlight." : {
 
     },
+    "Play Audiobook" : {
+
+    },
     "Playback Speed" : {
+
+    },
+    "Plays an audiobook from your library." : {
 
     },
     "Preferences" : {
 
     },
     "Publications" : {
+
+    },
+    "Read Book" : {
 
     },
     "Retry" : {
