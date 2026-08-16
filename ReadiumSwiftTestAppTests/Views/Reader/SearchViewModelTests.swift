@@ -10,7 +10,7 @@ import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import Testing
 
-class MockSearchIterator: SearchIterator {
+final class MockSearchIterator: SearchIterator, @unchecked Sendable {
     var resultCount: Int?
     var pages: [LocatorCollection?] = []
     var error: SearchError?

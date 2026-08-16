@@ -3,8 +3,8 @@
 //  ReadiumSwiftTestApp
 //
 
-@preconcurrency import ReadiumNavigator
-@preconcurrency import ReadiumShared
+import ReadiumNavigator
+import ReadiumShared
 import SwiftUI
 
 struct AudiobookPreferencesView: View {

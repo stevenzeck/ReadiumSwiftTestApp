@@ -6,8 +6,8 @@
 //
 
 import Foundation
-@preconcurrency import ReadiumOPDS
-@preconcurrency import ReadiumShared
+import ReadiumOPDS
+import ReadiumShared
 
 enum OPDSBrowserError: Error {
     case unknown
@@ -39,16 +39,19 @@ class ReadiumOPDSParsingService: OPDSParsingService {
         let result = await client.fetch(request)
 
         switch result {
-        case let .success(response):
-            guard let data = response.body else { return nil }
-            guard let httpResponse = HTTPURLResponse(
-                url: response.url.url,
-                statusCode: response.status.rawValue,
+        case let .success(body):
+            let data = body.body
+            let httpResponse = HTTPURLResponse(
+                url: url,
+                statusCode: 200,
                 httpVersion: nil,
-                headerFields: response.headers
-            ) else {
-                return nil
-            }
+                headerFields: nil
+            ) ?? URLResponse(
+                url: url,
+                mimeType: body.mediaType?.string,
+                expectedContentLength: data.count,
+                textEncodingName: nil
+            )
 
             let parsedFeed: Feed? = await Task.detached(priority: .userInitiated) {
                 // Try to parse as OPDS 1 (XML)

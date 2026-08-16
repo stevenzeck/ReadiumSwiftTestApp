@@ -5,8 +5,8 @@
 //  Created by Steven Zeck on 12/30/25.
 //
 
-@preconcurrency import ReadiumOPDS
-@preconcurrency import ReadiumShared
+import ReadiumOPDS
+import ReadiumShared
 import SwiftUI
 
 /// A recursive browser view for OPDS feeds.

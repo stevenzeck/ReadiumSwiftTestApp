@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@preconcurrency import ReadiumNavigator
+import ReadiumNavigator
 import ReadiumShared
 @testable import ReadiumSwiftTestApp
 import Testing

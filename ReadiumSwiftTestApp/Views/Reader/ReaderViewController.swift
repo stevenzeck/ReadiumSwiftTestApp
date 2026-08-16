@@ -5,8 +5,8 @@
 //  Created by Steven Zeck on 12/30/25.
 //
 
-@preconcurrency import ReadiumNavigator
-@preconcurrency import ReadiumShared
+import ReadiumNavigator
+import ReadiumShared
 import UIKit
 
 /// A container view controller that wraps the Readium Navigator.

@@ -6,8 +6,8 @@
 //
 
 import Foundation
-@preconcurrency import ReadiumNavigator
-@preconcurrency import ReadiumShared
+import ReadiumNavigator
+import ReadiumShared
 
 /// A Sendable wrapper for TTS Utterances.
 ///

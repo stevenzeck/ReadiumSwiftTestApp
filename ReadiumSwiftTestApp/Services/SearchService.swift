@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@preconcurrency import ReadiumShared
+import ReadiumShared
 
 /// Protocol definition for search capabilities.
 @MainActor

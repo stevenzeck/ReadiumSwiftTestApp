@@ -7,8 +7,8 @@
 
 import Foundation
 import Observation
-@preconcurrency import ReadiumShared
-@preconcurrency import ReadiumStreamer
+import ReadiumShared
+import ReadiumStreamer
 import SwiftData
 import UIKit
 

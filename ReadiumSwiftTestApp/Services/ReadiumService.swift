@@ -6,8 +6,8 @@
 //
 
 import Foundation
-@preconcurrency import ReadiumShared
-@preconcurrency import ReadiumStreamer
+import ReadiumShared
+import ReadiumStreamer
 import SwiftUI
 
 /// A centralized service for managing the Readium Toolkit's core components.

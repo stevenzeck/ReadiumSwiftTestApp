@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		959235332F0228660020050A /* ReadiumAdapterGCDWebServer in Frameworks */ = {isa = PBXBuildFile; productRef = 959235322F0228660020050A /* ReadiumAdapterGCDWebServer */; };
-		959235352F0228660020050A /* ReadiumAdapterLCPSQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 959235342F0228660020050A /* ReadiumAdapterLCPSQLite */; };
 		959235372F0228660020050A /* ReadiumLCP in Frameworks */ = {isa = PBXBuildFile; productRef = 959235362F0228660020050A /* ReadiumLCP */; };
 		959235392F0228660020050A /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = 959235382F0228660020050A /* ReadiumNavigator */; };
 		9592353B2F0228660020050A /* ReadiumOPDS in Frameworks */ = {isa = PBXBuildFile; productRef = 9592353A2F0228660020050A /* ReadiumOPDS */; };
@@ -77,11 +75,9 @@
 			files = (
 				959235372F0228660020050A /* ReadiumLCP in Frameworks */,
 				9592353D2F0228660020050A /* ReadiumShared in Frameworks */,
-				959235352F0228660020050A /* ReadiumAdapterLCPSQLite in Frameworks */,
 				9592353B2F0228660020050A /* ReadiumOPDS in Frameworks */,
 				9592353F2F0228660020050A /* ReadiumStreamer in Frameworks */,
 				959235392F0228660020050A /* ReadiumNavigator in Frameworks */,
-				959235332F0228660020050A /* ReadiumAdapterGCDWebServer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,8 +138,6 @@
 			);
 			name = ReadiumSwiftTestApp;
 			packageProductDependencies = (
-				959235322F0228660020050A /* ReadiumAdapterGCDWebServer */,
-				959235342F0228660020050A /* ReadiumAdapterLCPSQLite */,
 				959235362F0228660020050A /* ReadiumLCP */,
 				959235382F0228660020050A /* ReadiumNavigator */,
 				9592353A2F0228660020050A /* ReadiumOPDS */,
@@ -658,22 +652,12 @@
 			repositoryURL = "https://github.com/readium/swift-toolkit.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.10.0;
+				minimumVersion = "4.0.0-alpha.1";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		959235322F0228660020050A /* ReadiumAdapterGCDWebServer */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
-			productName = ReadiumAdapterGCDWebServer;
-		};
-		959235342F0228660020050A /* ReadiumAdapterLCPSQLite */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;
-			productName = ReadiumAdapterLCPSQLite;
-		};
 		959235362F0228660020050A /* ReadiumLCP */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 959235312F0228660020050A /* XCRemoteSwiftPackageReference "swift-toolkit" */;

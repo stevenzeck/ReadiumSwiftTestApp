@@ -7,7 +7,7 @@
 
 import Foundation
 import Observation
-@preconcurrency import ReadiumShared
+import ReadiumShared
 import SwiftData
 
 @MainActor

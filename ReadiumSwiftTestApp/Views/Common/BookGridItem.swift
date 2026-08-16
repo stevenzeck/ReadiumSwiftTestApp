@@ -5,7 +5,7 @@
 //  Created by Steven Zeck on 12/30/25.
 //
 
-@preconcurrency import ReadiumShared
+import ReadiumShared
 import SwiftUI
 
 /// A unified view for displaying a book item within a grid or list layout.

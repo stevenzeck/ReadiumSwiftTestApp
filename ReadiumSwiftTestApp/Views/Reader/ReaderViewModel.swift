@@ -7,8 +7,8 @@
 
 import Foundation
 import Observation
-@preconcurrency import ReadiumNavigator
-@preconcurrency import ReadiumShared
+import ReadiumNavigator
+import ReadiumShared
 import SwiftData
 import SwiftUI
 

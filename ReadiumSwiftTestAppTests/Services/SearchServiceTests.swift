@@ -11,7 +11,7 @@ import ReadiumShared
 import Testing
 
 /// Mock for the internal Readium Search Service (Protocol from ReadiumShared)
-class MockReadiumSearchService: ReadiumShared.SearchService {
+final class MockReadiumSearchService: ReadiumShared.SearchService, @unchecked Sendable {
     /// Protocol requirement: options property
     var options: SearchOptions = .init()
 
@@ -35,9 +35,11 @@ class MockReadiumSearchService: ReadiumShared.SearchService {
 }
 
 /// Minimal iterator mock for this test
-class MinimalMockIterator: SearchIterator {
+final class MinimalMockIterator: SearchIterator, @unchecked Sendable {
     /// Protocol requirement: resultCount
-    var resultCount: Int? = 0
+    var resultCount: Int? {
+        0
+    }
 
     func next() async -> SearchResult<LocatorCollection?> {
         return .success(nil)

@@ -7,7 +7,7 @@
 
 import AVFoundation
 import Foundation
-@preconcurrency import ReadiumNavigator
+import ReadiumNavigator
 import ReadiumShared
 import SwiftUI
 

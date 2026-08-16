@@ -7,8 +7,8 @@
 
 import Foundation
 import Observation
-@preconcurrency import ReadiumOPDS
-@preconcurrency import ReadiumShared
+import ReadiumOPDS
+import ReadiumShared
 
 /// ViewModel for fetching and parsing the OPDS feed.
 @MainActor
