@@ -12,7 +12,7 @@ import SwiftData
 import UIKit
 
 /// A Sendable protocol defining asynchronous file system operations.
-protocol FileManaging: Sendable {
+nonisolated protocol FileManaging: Sendable {
     func documentDirectoryURL() async -> URL
     func removeItem(at url: URL) async throws
     func copyItem(at srcURL: URL, to dstURL: URL) async throws
